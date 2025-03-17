@@ -1,0 +1,92 @@
+﻿@model Uling_RestaurantManagementSystem.Models.Custom.ManagerDashboardDataModel
+
+@{
+    ViewBag.Title = "Dashboard";
+}
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar-->
+    @Html.Partial("_SideBar")
+
+    <!-- Page content wrapper-->
+    <div id="page-content-wrapper">
+        <!-- Top navigation-->
+        @Html.Partial("_Nav")
+
+        <!-- Page content-->
+        <div class="container-fluid">
+            <div class="row px-5 pt-5">
+                <div class="col-sm-12">
+                    <p class="text-secondary" style="font-size: 1.5rem">Dashboard</p>
+                </div>
+            </div>
+
+            <div class="row px-5">
+                <!-- Pending Reservations Card -->
+                <div class="col-sm-4 mb-4">
+                    <!-- Added mb-4 for margin-bottom -->
+                    <a href="@Url.Action("LoadManagerReservation", "ManagerReservations")" class="text-decoration-none">
+                        <div class="bg-white card-shadow px-3 py-2">
+                            <div class="card-body">
+                                <p class="mb-2 text-theme-1 font-weight-600">Pending Reservations</p>
+                                <h1 class="text-secondary display-5">@Model.PendingReservationCount</h1>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Accepted Reservations Card -->
+                <div class="col-sm-4 mb-4">
+                    <!-- Added mb-4 for margin-bottom -->
+                    <a href="@Url.Action("LoadManagerReservation", "ManagerReservations")" class="text-decoration-none">
+                        <div class="bg-white card-shadow px-3 py-2">
+                            <div class="card-body">
+                                <p class="mb-2 text-theme-1 font-weight-600">Accepted Reservations</p>
+                                <h1 class="text-secondary display-5">@Model.AcceptedReservationCount</h1>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Take-out Orders Card -->
+                <div class="col-sm-4 mb-4">
+                    <!-- Added mb-4 for margin-bottom -->
+                    <a href="@Url.Action("LoadTakeOutOrders", "ManagerTakeOutOrders")" class="text-decoration-none">
+                        <div class="bg-white card-shadow px-3 py-2">
+                            <div class="card-body">
+                                <p class="mb-2 text-theme-1 font-weight-600">Pending Take-out Orders</p>
+                                <h1 class="text-secondary display-5">@Model.PendingTakeOutOrdersCount</h1>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Take-out Orders Card -->
+                <div class="col-sm-4 mb-4">
+                    <!-- Added mb-4 for margin-bottom -->
+                    <a href="@Url.Action("LoadTakeOutOrders", "ManagerTakeOutOrders")" class="text-decoration-none">
+                        <div class="bg-white card-shadow px-3 py-2">
+                            <div class="card-body">
+                                <p class="mb-2 text-theme-1 font-weight-600">Accepted Take-out Orders</p>
+                                <h1 class="text-secondary display-5">@Model.AcceptedTakeOutOrdersCount</h1>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Accounts Card -->
+                <div class="col-sm-4 mb-4">
+                    <!-- Added mb-4 for margin-bottom -->
+                    <a href="@Url.Action("LoadManagerAccounts", "ManagerAccounts")" class="text-decoration-none">
+                        <div class="bg-white card-shadow px-3 py-2">
+                            <div class="card-body">
+                                <p class="mb-2 text-theme-1 font-weight-600">Accounts</p>
+                                <h1 class="text-secondary display-5">@Model.AccountCount</h1>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

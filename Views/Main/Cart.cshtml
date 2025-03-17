@@ -1,0 +1,39 @@
+﻿@model IEnumerable<Uling_RestaurantManagementSystem.Models.Custom.CartItemModel>
+
+@{
+    ViewBag.Title = "Your Orders";
+}
+
+<div class="container mt-5 pt-sm-5">
+    <div class="row pt-5">
+        <div class="col-sm-12" style="border: 1px solid black">
+            <h3>Your Orders</h3>
+            @if (Model.Any())
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product ID</th>
+                            <th>Quantity</th>
+                            <th>Line Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.ProductId</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.LineTotal</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>Your cart is empty.</p>
+            }
+        </div>
+    </div>
+</div>

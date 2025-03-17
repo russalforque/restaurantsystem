@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="9eef2a0a2888400e86fb9dce242733e0" Name="Diagram1" ZoomLevel="85">
+        <EntityTypeShape EntityType="db_urmsModel.tbl_discounts" Width="1.5" PointX="0.75" PointY="11.125" />
+        <EntityTypeShape EntityType="db_urmsModel.tbl_menu_items" Width="1.5" PointX="0.75" PointY="2" />
+        <EntityTypeShape EntityType="db_urmsModel.tbl_order_items" Width="1.5" PointX="3" PointY="6.375" />
+        <EntityTypeShape EntityType="db_urmsModel.tbl_orders" Width="1.5" PointX="0.75" PointY="6.125" />
+        <EntityTypeShape EntityType="db_urmsModel.tbl_payment" Width="1.5" PointX="3" PointY="15.125" />
+        <EntityTypeShape EntityType="db_urmsModel.tbl_receipts" Width="1.5" PointX="6" PointY="6.5" />
+        <EntityTypeShape EntityType="db_urmsModel.tbl_reservations" Width="1.5" PointX="3" PointY="11.625" />
+        <EntityTypeShape EntityType="db_urmsModel.tbl_users" Width="1.5" PointX="3.75" PointY="2.5" />
+        <AssociationConnector Association="db_urmsModel.fk_tbl_discounts__discount_id1" />
+        <AssociationConnector Association="db_urmsModel.fk_tbl_menu_items__menu_item_id1" />
+        <AssociationConnector Association="db_urmsModel.fk_tbl_orders__order_id1" />
+        <AssociationConnector Association="db_urmsModel.fk_tbl_orders__order_id2" />
+        <AssociationConnector Association="db_urmsModel.fk_tbl_orders__order_id3" />
+        <AssociationConnector Association="db_urmsModel.fk_tbl_orders__order_id4" />
+        <AssociationConnector Association="db_urmsModel.fk_tbl_users__user_id1" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

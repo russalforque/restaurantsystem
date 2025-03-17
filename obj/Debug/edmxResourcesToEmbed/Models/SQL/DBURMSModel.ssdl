@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="db_urmsModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="tbl_discounts">
+    <Key>
+      <PropertyRef Name="discount_id" />
+    </Key>
+    <Property Name="discount_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="discount_code" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="description" Type="varchar" MaxLength="255" />
+    <Property Name="discount_percentage" Type="decimal" Precision="18" Scale="0" Nullable="false" />
+    <Property Name="discount_amount" Type="decimal" Precision="18" Scale="0" Nullable="false" />
+    <Property Name="is_active" Type="int" />
+  </EntityType>
+  <EntityType Name="tbl_menu_items">
+    <Key>
+      <PropertyRef Name="menu_item_id" />
+    </Key>
+    <Property Name="menu_item_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="name" Type="varchar" MaxLength="100" Nullable="false" />
+    <Property Name="description" Type="varchar" MaxLength="255" Nullable="false" />
+    <Property Name="price" Type="decimal" Precision="18" Scale="0" Nullable="false" />
+    <Property Name="category" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="is_available" Type="bit" />
+  </EntityType>
+  <EntityType Name="tbl_order_items">
+    <Key>
+      <PropertyRef Name="order_item_id" />
+    </Key>
+    <Property Name="order_item_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="order_id" Type="int" Nullable="false" />
+    <Property Name="menu_item_id" Type="int" Nullable="false" />
+    <Property Name="quantity" Type="int" Nullable="false" />
+    <Property Name="line_price" Type="decimal" Precision="18" Scale="0" Nullable="false" />
+    <Property Name="discount_id" Type="int" />
+  </EntityType>
+  <EntityType Name="tbl_orders">
+    <Key>
+      <PropertyRef Name="order_id" />
+    </Key>
+    <Property Name="order_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="order_type" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="total_amount" Type="decimal" Precision="18" Scale="0" Nullable="false" />
+    <Property Name="date_ordered" Type="datetime" Nullable="false" />
+    <Property Name="customer_name" Type="varchar" MaxLength="255" Nullable="false" />
+    <Property Name="email" Type="varchar" MaxLength="255" Nullable="false" />
+    <Property Name="contact_number" Type="varchar" MaxLength="25" Nullable="false" />
+    <Property Name="order_status" Type="varchar" MaxLength="50" Nullable="false" />
+  </EntityType>
+  <EntityType Name="tbl_payment">
+    <Key>
+      <PropertyRef Name="payment_id" />
+    </Key>
+    <Property Name="payment_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="order_id" Type="int" Nullable="false" />
+    <Property Name="amount" Type="decimal" Precision="18" Scale="0" Nullable="false" />
+    <Property Name="payment_method" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="payment_url" Type="text" />
+    <Property Name="payment_status" Type="varchar" MaxLength="50" Nullable="false" />
+  </EntityType>
+  <EntityType Name="tbl_receipts">
+    <Key>
+      <PropertyRef Name="receipt_id" />
+    </Key>
+    <Property Name="receipt_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="order_id" Type="int" Nullable="false" />
+    <Property Name="receipt_date" Type="datetime" Nullable="false" />
+    <Property Name="sub_total" Type="decimal" Precision="18" Scale="0" Nullable="false" />
+    <Property Name="amount_due" Type="decimal" Precision="18" Scale="0" Nullable="false" />
+    <Property Name="cashier_id" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="tbl_reservations">
+    <Key>
+      <PropertyRef Name="reservation_id" />
+    </Key>
+    <Property Name="reservation_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="order_id" Type="int" Nullable="false" />
+    <Property Name="reservation_date" Type="date" Nullable="false" />
+    <Property Name="time_start" Type="time" Precision="7" Nullable="false" />
+    <Property Name="time_end" Type="time" Precision="7" Nullable="false" />
+    <Property Name="heads" Type="int" Nullable="false" />
+    <Property Name="note" Type="text" />
+    <Property Name="reservation_status" Type="varchar" MaxLength="50" Nullable="false" />
+  </EntityType>
+  <EntityType Name="tbl_users">
+    <Key>
+      <PropertyRef Name="user_id" />
+    </Key>
+    <Property Name="user_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="firstname" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="middlename" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="lastname" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="usertype" Type="int" Nullable="false" />
+    <Property Name="email" Type="varchar" MaxLength="250" Nullable="false" />
+    <Property Name="password" Type="varchar" MaxLength="250" Nullable="false" />
+  </EntityType>
+  <Association Name="fk_tbl_discounts__discount_id1">
+    <End Role="tbl_discounts" Type="Self.tbl_discounts" Multiplicity="0..1" />
+    <End Role="tbl_order_items" Type="Self.tbl_order_items" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tbl_discounts">
+        <PropertyRef Name="discount_id" />
+      </Principal>
+      <Dependent Role="tbl_order_items">
+        <PropertyRef Name="discount_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="fk_tbl_menu_items__menu_item_id1">
+    <End Role="tbl_menu_items" Type="Self.tbl_menu_items" Multiplicity="1" />
+    <End Role="tbl_order_items" Type="Self.tbl_order_items" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tbl_menu_items">
+        <PropertyRef Name="menu_item_id" />
+      </Principal>
+      <Dependent Role="tbl_order_items">
+        <PropertyRef Name="menu_item_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="fk_tbl_orders__order_id1">
+    <End Role="tbl_orders" Type="Self.tbl_orders" Multiplicity="1" />
+    <End Role="tbl_order_items" Type="Self.tbl_order_items" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tbl_orders">
+        <PropertyRef Name="order_id" />
+      </Principal>
+      <Dependent Role="tbl_order_items">
+        <PropertyRef Name="order_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="fk_tbl_orders__order_id2">
+    <End Role="tbl_orders" Type="Self.tbl_orders" Multiplicity="1" />
+    <End Role="tbl_reservations" Type="Self.tbl_reservations" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tbl_orders">
+        <PropertyRef Name="order_id" />
+      </Principal>
+      <Dependent Role="tbl_reservations">
+        <PropertyRef Name="order_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="fk_tbl_orders__order_id3">
+    <End Role="tbl_orders" Type="Self.tbl_orders" Multiplicity="1" />
+    <End Role="tbl_payment" Type="Self.tbl_payment" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tbl_orders">
+        <PropertyRef Name="order_id" />
+      </Principal>
+      <Dependent Role="tbl_payment">
+        <PropertyRef Name="order_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="fk_tbl_orders__order_id4">
+    <End Role="tbl_orders" Type="Self.tbl_orders" Multiplicity="1" />
+    <End Role="tbl_receipts" Type="Self.tbl_receipts" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tbl_orders">
+        <PropertyRef Name="order_id" />
+      </Principal>
+      <Dependent Role="tbl_receipts">
+        <PropertyRef Name="order_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="fk_tbl_users__user_id1">
+    <End Role="tbl_users" Type="Self.tbl_users" Multiplicity="1" />
+    <End Role="tbl_receipts" Type="Self.tbl_receipts" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tbl_users">
+        <PropertyRef Name="user_id" />
+      </Principal>
+      <Dependent Role="tbl_receipts">
+        <PropertyRef Name="cashier_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityContainer Name="db_urmsModelStoreContainer">
+    <EntitySet Name="tbl_discounts" EntityType="Self.tbl_discounts" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="tbl_menu_items" EntityType="Self.tbl_menu_items" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="tbl_order_items" EntityType="Self.tbl_order_items" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="tbl_orders" EntityType="Self.tbl_orders" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="tbl_payment" EntityType="Self.tbl_payment" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="tbl_receipts" EntityType="Self.tbl_receipts" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="tbl_reservations" EntityType="Self.tbl_reservations" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="tbl_users" EntityType="Self.tbl_users" Schema="dbo" store:Type="Tables" />
+    <AssociationSet Name="fk_tbl_discounts__discount_id1" Association="Self.fk_tbl_discounts__discount_id1">
+      <End Role="tbl_discounts" EntitySet="tbl_discounts" />
+      <End Role="tbl_order_items" EntitySet="tbl_order_items" />
+    </AssociationSet>
+    <AssociationSet Name="fk_tbl_menu_items__menu_item_id1" Association="Self.fk_tbl_menu_items__menu_item_id1">
+      <End Role="tbl_menu_items" EntitySet="tbl_menu_items" />
+      <End Role="tbl_order_items" EntitySet="tbl_order_items" />
+    </AssociationSet>
+    <AssociationSet Name="fk_tbl_orders__order_id1" Association="Self.fk_tbl_orders__order_id1">
+      <End Role="tbl_orders" EntitySet="tbl_orders" />
+      <End Role="tbl_order_items" EntitySet="tbl_order_items" />
+    </AssociationSet>
+    <AssociationSet Name="fk_tbl_orders__order_id2" Association="Self.fk_tbl_orders__order_id2">
+      <End Role="tbl_orders" EntitySet="tbl_orders" />
+      <End Role="tbl_reservations" EntitySet="tbl_reservations" />
+    </AssociationSet>
+    <AssociationSet Name="fk_tbl_orders__order_id3" Association="Self.fk_tbl_orders__order_id3">
+      <End Role="tbl_orders" EntitySet="tbl_orders" />
+      <End Role="tbl_payment" EntitySet="tbl_payment" />
+    </AssociationSet>
+    <AssociationSet Name="fk_tbl_orders__order_id4" Association="Self.fk_tbl_orders__order_id4">
+      <End Role="tbl_orders" EntitySet="tbl_orders" />
+      <End Role="tbl_receipts" EntitySet="tbl_receipts" />
+    </AssociationSet>
+    <AssociationSet Name="fk_tbl_users__user_id1" Association="Self.fk_tbl_users__user_id1">
+      <End Role="tbl_users" EntitySet="tbl_users" />
+      <End Role="tbl_receipts" EntitySet="tbl_receipts" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>

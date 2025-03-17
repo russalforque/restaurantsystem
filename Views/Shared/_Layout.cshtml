@@ -1,0 +1,21 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Uling Top View Restaurant</title>
+    @Styles.Render("~/Content/Site.css")
+    @Styles.Render("~/Content/bootstrap.css")
+    @Styles.Render("~/Content/fontawesome/css/all.css")
+    @Styles.Render("~/Content/sidebar/sidebar.css")
+</head>
+<body>
+    @RenderBody()
+
+    @Scripts.Render("~/Scripts/jquery/jquery-3.6.0.js")
+    @Scripts.Render("~/Scripts/bootstrap.bundle.min.js")
+    @Scripts.Render("~/Scripts/sidebar/sidebar.js")
+    @Scripts.Render("~/Scripts/globals/global.js")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

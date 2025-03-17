@@ -1,0 +1,232 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="db_urmsModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityContainer Name="db_urmsEntities" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="tbl_discounts" EntityType="db_urmsModel.tbl_discounts" />
+    <EntitySet Name="tbl_menu_items" EntityType="db_urmsModel.tbl_menu_items" />
+    <EntitySet Name="tbl_order_items" EntityType="db_urmsModel.tbl_order_items" />
+    <EntitySet Name="tbl_orders" EntityType="db_urmsModel.tbl_orders" />
+    <EntitySet Name="tbl_payment" EntityType="db_urmsModel.tbl_payment" />
+    <EntitySet Name="tbl_receipts" EntityType="db_urmsModel.tbl_receipts" />
+    <EntitySet Name="tbl_reservations" EntityType="db_urmsModel.tbl_reservations" />
+    <EntitySet Name="tbl_users" EntityType="db_urmsModel.tbl_users" />
+    <AssociationSet Name="fk_tbl_discounts__discount_id1" Association="db_urmsModel.fk_tbl_discounts__discount_id1">
+      <End Role="tbl_discounts" EntitySet="tbl_discounts" />
+      <End Role="tbl_order_items" EntitySet="tbl_order_items" />
+    </AssociationSet>
+    <AssociationSet Name="fk_tbl_menu_items__menu_item_id1" Association="db_urmsModel.fk_tbl_menu_items__menu_item_id1">
+      <End Role="tbl_menu_items" EntitySet="tbl_menu_items" />
+      <End Role="tbl_order_items" EntitySet="tbl_order_items" />
+    </AssociationSet>
+    <AssociationSet Name="fk_tbl_orders__order_id1" Association="db_urmsModel.fk_tbl_orders__order_id1">
+      <End Role="tbl_orders" EntitySet="tbl_orders" />
+      <End Role="tbl_order_items" EntitySet="tbl_order_items" />
+    </AssociationSet>
+    <AssociationSet Name="fk_tbl_orders__order_id2" Association="db_urmsModel.fk_tbl_orders__order_id2">
+      <End Role="tbl_orders" EntitySet="tbl_orders" />
+      <End Role="tbl_reservations" EntitySet="tbl_reservations" />
+    </AssociationSet>
+    <AssociationSet Name="fk_tbl_orders__order_id3" Association="db_urmsModel.fk_tbl_orders__order_id3">
+      <End Role="tbl_orders" EntitySet="tbl_orders" />
+      <End Role="tbl_payment" EntitySet="tbl_payment" />
+    </AssociationSet>
+    <AssociationSet Name="fk_tbl_orders__order_id4" Association="db_urmsModel.fk_tbl_orders__order_id4">
+      <End Role="tbl_orders" EntitySet="tbl_orders" />
+      <End Role="tbl_receipts" EntitySet="tbl_receipts" />
+    </AssociationSet>
+    <AssociationSet Name="fk_tbl_users__user_id1" Association="db_urmsModel.fk_tbl_users__user_id1">
+      <End Role="tbl_users" EntitySet="tbl_users" />
+      <End Role="tbl_receipts" EntitySet="tbl_receipts" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="tbl_discounts">
+    <Key>
+      <PropertyRef Name="discount_id" />
+    </Key>
+    <Property Name="discount_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="discount_code" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="description" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+    <Property Name="discount_percentage" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
+    <Property Name="discount_amount" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
+    <Property Name="is_active" Type="Int32" />
+    <NavigationProperty Name="tbl_order_items" Relationship="db_urmsModel.fk_tbl_discounts__discount_id1" FromRole="tbl_discounts" ToRole="tbl_order_items" />
+  </EntityType>
+  <EntityType Name="tbl_menu_items">
+    <Key>
+      <PropertyRef Name="menu_item_id" />
+    </Key>
+    <Property Name="menu_item_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="name" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+    <Property Name="description" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
+    <Property Name="price" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
+    <Property Name="category" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="is_available" Type="Boolean" />
+    <NavigationProperty Name="tbl_order_items" Relationship="db_urmsModel.fk_tbl_menu_items__menu_item_id1" FromRole="tbl_menu_items" ToRole="tbl_order_items" />
+  </EntityType>
+  <EntityType Name="tbl_order_items">
+    <Key>
+      <PropertyRef Name="order_item_id" />
+    </Key>
+    <Property Name="order_item_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="order_id" Type="Int32" Nullable="false" />
+    <Property Name="menu_item_id" Type="Int32" Nullable="false" />
+    <Property Name="quantity" Type="Int32" Nullable="false" />
+    <Property Name="line_price" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
+    <Property Name="discount_id" Type="Int32" />
+    <NavigationProperty Name="tbl_discounts" Relationship="db_urmsModel.fk_tbl_discounts__discount_id1" FromRole="tbl_order_items" ToRole="tbl_discounts" />
+    <NavigationProperty Name="tbl_menu_items" Relationship="db_urmsModel.fk_tbl_menu_items__menu_item_id1" FromRole="tbl_order_items" ToRole="tbl_menu_items" />
+    <NavigationProperty Name="tbl_orders" Relationship="db_urmsModel.fk_tbl_orders__order_id1" FromRole="tbl_order_items" ToRole="tbl_orders" />
+  </EntityType>
+  <EntityType Name="tbl_orders">
+    <Key>
+      <PropertyRef Name="order_id" />
+    </Key>
+    <Property Name="order_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="order_type" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="total_amount" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
+    <Property Name="date_ordered" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="customer_name" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
+    <Property Name="email" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
+    <Property Name="contact_number" Type="String" Nullable="false" MaxLength="25" FixedLength="false" Unicode="false" />
+    <Property Name="order_status" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+    <NavigationProperty Name="tbl_order_items" Relationship="db_urmsModel.fk_tbl_orders__order_id1" FromRole="tbl_orders" ToRole="tbl_order_items" />
+    <NavigationProperty Name="tbl_reservations" Relationship="db_urmsModel.fk_tbl_orders__order_id2" FromRole="tbl_orders" ToRole="tbl_reservations" />
+    <NavigationProperty Name="tbl_payment" Relationship="db_urmsModel.fk_tbl_orders__order_id3" FromRole="tbl_orders" ToRole="tbl_payment" />
+    <NavigationProperty Name="tbl_receipts" Relationship="db_urmsModel.fk_tbl_orders__order_id4" FromRole="tbl_orders" ToRole="tbl_receipts" />
+  </EntityType>
+  <EntityType Name="tbl_payment">
+    <Key>
+      <PropertyRef Name="payment_id" />
+    </Key>
+    <Property Name="payment_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="order_id" Type="Int32" Nullable="false" />
+    <Property Name="amount" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
+    <Property Name="payment_method" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="payment_url" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+    <Property Name="payment_status" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+    <NavigationProperty Name="tbl_orders" Relationship="db_urmsModel.fk_tbl_orders__order_id3" FromRole="tbl_payment" ToRole="tbl_orders" />
+  </EntityType>
+  <EntityType Name="tbl_receipts">
+    <Key>
+      <PropertyRef Name="receipt_id" />
+    </Key>
+    <Property Name="receipt_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="order_id" Type="Int32" Nullable="false" />
+    <Property Name="receipt_date" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="sub_total" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
+    <Property Name="amount_due" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
+    <Property Name="cashier_id" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="tbl_orders" Relationship="db_urmsModel.fk_tbl_orders__order_id4" FromRole="tbl_receipts" ToRole="tbl_orders" />
+    <NavigationProperty Name="tbl_users" Relationship="db_urmsModel.fk_tbl_users__user_id1" FromRole="tbl_receipts" ToRole="tbl_users" />
+  </EntityType>
+  <EntityType Name="tbl_reservations">
+    <Key>
+      <PropertyRef Name="reservation_id" />
+    </Key>
+    <Property Name="reservation_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="order_id" Type="Int32" Nullable="false" />
+    <Property Name="reservation_date" Type="DateTime" Nullable="false" Precision="0" />
+    <Property Name="time_start" Type="Time" Nullable="false" Precision="7" />
+    <Property Name="time_end" Type="Time" Nullable="false" Precision="7" />
+    <Property Name="heads" Type="Int32" Nullable="false" />
+    <Property Name="note" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+    <Property Name="reservation_status" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+    <NavigationProperty Name="tbl_orders" Relationship="db_urmsModel.fk_tbl_orders__order_id2" FromRole="tbl_reservations" ToRole="tbl_orders" />
+  </EntityType>
+  <EntityType Name="tbl_users">
+    <Key>
+      <PropertyRef Name="user_id" />
+    </Key>
+    <Property Name="user_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="firstname" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="middlename" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="lastname" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="usertype" Type="Int32" Nullable="false" />
+    <Property Name="email" Type="String" Nullable="false" MaxLength="250" FixedLength="false" Unicode="false" />
+    <Property Name="password" Type="String" Nullable="false" MaxLength="250" FixedLength="false" Unicode="false" />
+    <NavigationProperty Name="tbl_receipts" Relationship="db_urmsModel.fk_tbl_users__user_id1" FromRole="tbl_users" ToRole="tbl_receipts" />
+  </EntityType>
+  <Association Name="fk_tbl_discounts__discount_id1">
+    <End Type="db_urmsModel.tbl_discounts" Role="tbl_discounts" Multiplicity="0..1" />
+    <End Type="db_urmsModel.tbl_order_items" Role="tbl_order_items" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tbl_discounts">
+        <PropertyRef Name="discount_id" />
+      </Principal>
+      <Dependent Role="tbl_order_items">
+        <PropertyRef Name="discount_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="fk_tbl_menu_items__menu_item_id1">
+    <End Type="db_urmsModel.tbl_menu_items" Role="tbl_menu_items" Multiplicity="1" />
+    <End Type="db_urmsModel.tbl_order_items" Role="tbl_order_items" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tbl_menu_items">
+        <PropertyRef Name="menu_item_id" />
+      </Principal>
+      <Dependent Role="tbl_order_items">
+        <PropertyRef Name="menu_item_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="fk_tbl_orders__order_id1">
+    <End Type="db_urmsModel.tbl_orders" Role="tbl_orders" Multiplicity="1" />
+    <End Type="db_urmsModel.tbl_order_items" Role="tbl_order_items" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tbl_orders">
+        <PropertyRef Name="order_id" />
+      </Principal>
+      <Dependent Role="tbl_order_items">
+        <PropertyRef Name="order_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="fk_tbl_orders__order_id2">
+    <End Type="db_urmsModel.tbl_orders" Role="tbl_orders" Multiplicity="1" />
+    <End Type="db_urmsModel.tbl_reservations" Role="tbl_reservations" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tbl_orders">
+        <PropertyRef Name="order_id" />
+      </Principal>
+      <Dependent Role="tbl_reservations">
+        <PropertyRef Name="order_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="fk_tbl_orders__order_id3">
+    <End Type="db_urmsModel.tbl_orders" Role="tbl_orders" Multiplicity="1" />
+    <End Type="db_urmsModel.tbl_payment" Role="tbl_payment" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tbl_orders">
+        <PropertyRef Name="order_id" />
+      </Principal>
+      <Dependent Role="tbl_payment">
+        <PropertyRef Name="order_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="fk_tbl_orders__order_id4">
+    <End Type="db_urmsModel.tbl_orders" Role="tbl_orders" Multiplicity="1" />
+    <End Type="db_urmsModel.tbl_receipts" Role="tbl_receipts" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tbl_orders">
+        <PropertyRef Name="order_id" />
+      </Principal>
+      <Dependent Role="tbl_receipts">
+        <PropertyRef Name="order_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="fk_tbl_users__user_id1">
+    <End Type="db_urmsModel.tbl_users" Role="tbl_users" Multiplicity="1" />
+    <End Type="db_urmsModel.tbl_receipts" Role="tbl_receipts" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="tbl_users">
+        <PropertyRef Name="user_id" />
+      </Principal>
+      <Dependent Role="tbl_receipts">
+        <PropertyRef Name="cashier_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema>

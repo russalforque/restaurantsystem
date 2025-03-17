@@ -1,0 +1,304 @@
+﻿@model List<Uling_RestaurantManagementSystem.Models.Custom.PlaceOrderModel>
+
+@{
+    ViewBag.Title = "Manage Orders";
+}
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar-->
+    @Html.Partial("_SideBar")
+
+    <!-- Page content wrapper-->
+    <div id="page-content-wrapper">
+        <!-- Top navigation-->
+        @Html.Partial("_Nav")
+
+        <!-- Page content-->
+        <div class="container-fluid">
+            <div class="row ps-5 pt-5">
+                <div class="col-sm-12">
+                    <p class="text-secondary" style="font-size: 1.5rem">Manage Orders</p>
+                </div>
+            </div>
+
+            <div class="row px-5">
+                <div class="col-sm-12">
+                    <!-- Navigation Tabs -->
+                    <ul class="nav nav-tabs mt-3" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active"
+                               id="order-queue-tab"
+                               data-bs-toggle="tab"
+                               href="#order-queue"
+                               role="tab"
+                               aria-controls="order-queue"
+                               aria-selected="true">Order Queue</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link"
+                               id="to-serve-tab"
+                               data-bs-toggle="tab"
+                               href="#to-serve"
+                               role="tab"
+                               aria-controls="to-serve"
+                               aria-selected="false">To Serve</a>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade show active" id="order-queue" role="tabpanel" aria-labelledby="order-queue-tab">
+                            <!-- Order Queue content -->
+                            <div class="row mt-4">
+                                @if (Model != null && !Model.Any())
+                                {
+                                    <div class="col-sm-12 text-center my-4">
+                                        <span class="text-secondary">-- No queuing orders --</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    foreach (var order in Model)
+                                    {
+                                        if (order.Order.order_status == "Pending" || order.Order.order_status == "Preparation")
+                                        {
+                                            string kitchenStatus = "";
+                                            string cardHeaderClass = "";
+
+                                            switch (order.Order.order_status)
+                                            {
+                                                case "Accepted":
+                                                    kitchenStatus = "Pending";
+                                                    cardHeaderClass = "bg-secondary text-white";
+                                                    break;
+                                                case "Preparation":
+                                                    kitchenStatus = "Preparing";
+                                                    cardHeaderClass = "bg-warning text-dark";
+                                                    break;
+                                                default:
+                                                    break;
+                                            }
+
+                                            <div class="col-sm-3">
+                                                <div class="card mb-4">
+                                                    <div class="card-header @cardHeaderClass font-weight-600 py-3">
+                                                        @kitchenStatus
+                                                    </div>
+                                                    <div class="card-body bg-light px-4 pb-4">
+                                                        <strong>Main Course</strong>
+                                                        <div class="mb-2 py-2 ps-3">
+                                                            @{
+                                                                int mainCourseCount = order.OrderItems.Count(oi => oi.tbl_menu_items.category == "Main Course");
+                                                            }
+
+                                                            @if (mainCourseCount == 0)
+                                                            {
+                                                                <span class="text-secondary">--</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                foreach (var orderItem in order.OrderItems)
+                                                                {
+                                                                    if (orderItem.tbl_menu_items.category == "Main Course")
+                                                                    {
+                                                                        <strong>@(orderItem.quantity + "x")</strong> <span>@orderItem.tbl_menu_items.name</span> <br />
+                                                                    }
+                                                                }
+                                                            }
+                                                        </div>
+
+                                                        <strong>Appetizer</strong>
+                                                        <div class="mb-2 py-2 ps-3">
+                                                            @{
+                                                                int appetizerCount = order.OrderItems.Count(oi => oi.tbl_menu_items.category == "Appetizer");
+                                                            }
+
+                                                            @if (appetizerCount == 0)
+                                                            {
+                                                                <span class="text-secondary">--</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                foreach (var orderItem in order.OrderItems)
+                                                                {
+                                                                    if (orderItem.tbl_menu_items.category == "Appetizer")
+                                                                    {
+                                                                        <strong>@(orderItem.quantity + "x")</strong> <span>@orderItem.tbl_menu_items.name</span> <br />
+                                                                    }
+                                                                }
+                                                            }
+                                                        </div>
+
+                                                        <strong>Dessert</strong>
+                                                        <div class="mb-2 py-2 ps-3">
+                                                            @{
+                                                                int dessertCount = order.OrderItems.Count(oi => oi.tbl_menu_items.category == "Dessert");
+                                                            }
+
+                                                            @if (dessertCount == 0)
+                                                            {
+                                                                <span class="text-secondary">--</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                foreach (var orderItem in order.OrderItems)
+                                                                {
+                                                                    if (orderItem.tbl_menu_items.category == "Dessert")
+                                                                    {
+                                                                        <strong>@(orderItem.quantity + "x")</strong> <span>@orderItem.tbl_menu_items.name</span> <br />
+                                                                    }
+                                                                }
+                                                            }
+                                                        </div>
+
+                                                        <hr />
+                                                        <strong>Notes</strong>
+                                                        <div class="mb-2 py-2 ps-3">
+                                                            @if (order.Reservation != null)
+                                                            {
+                                                                <span>@order.Reservation.note</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="text-secondary">--</span>
+                                                            }
+
+                                                        </div>
+
+                                                        <form action="@Url.Action("ChangeOrderStatus", "CookManageOrders")" method="post">
+                                                            <input type="hidden" name="order_id" value="@order.Order.order_id" />
+                                                            @switch (order.Order.order_status)
+                                                            {
+                                                                case "Accepted":
+                                                                    <input type="hidden" name="order_status" value="Preparation" />
+                                                                    <button type="submit" class="btn btn-secondary rounded-corner px-4 mt-3">Prepare</button>
+                                                                    break;
+                                                                case "Preparation":
+                                                                    <input type="hidden" name="order_status" value="Ready" />
+                                                                    <button type="submit" class="btn btn-warning rounded-corner px-4 mt-3">Serve</button>
+                                                                    break;
+                                                                default:
+                                                                    break;
+                                                            }
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                }
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="to-serve" role="tabpanel" aria-labelledby="to-serve-tab">
+                            <!-- To Serve content -->
+                            <div class="row mt-4">
+                                @if (Model != null && !Model.Any())
+                                {
+                                    <div class="col-sm-12 text-center my-4">
+                                        <span class="text-secondary">-- No queuing orders --</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    foreach (var order in Model)
+                                    {
+                                        if (order.Order.order_status == "Ready")
+                                        {
+                                            <div class="col-sm-3">
+                                                <div class="card mb-4">
+                                                    <div class="card-header bg-success text-white font-weight-600 py-3">
+                                                        Ready To Serve
+                                                    </div>
+                                                    <div class="card-body bg-light px-4 pb-4">
+                                                        <strong>Main Course</strong>
+                                                        <div class="mb-2 py-2 ps-3">
+                                                            @{
+                                                                int mainCourseCount = order.OrderItems.Count(oi => oi.tbl_menu_items.category == "Main Course");
+                                                            }
+
+                                                            @if (mainCourseCount == 0)
+                                                            {
+                                                                <span class="text-secondary">--</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                foreach (var orderItem in order.OrderItems)
+                                                                {
+                                                                    if (orderItem.tbl_menu_items.category == "Main Course")
+                                                                    {
+                                                                        <strong>@(orderItem.quantity + "x")</strong> <span>@orderItem.tbl_menu_items.name</span> <br />
+                                                                    }
+                                                                }
+                                                            }
+                                                        </div>
+
+                                                        <strong>Appetizer</strong>
+                                                        <div class="mb-2 py-2 ps-3">
+                                                            @{
+                                                                int appetizerCount = order.OrderItems.Count(oi => oi.tbl_menu_items.category == "Appetizer");
+                                                            }
+
+                                                            @if (appetizerCount == 0)
+                                                            {
+                                                                <span class="text-secondary">--</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                foreach (var orderItem in order.OrderItems)
+                                                                {
+                                                                    if (orderItem.tbl_menu_items.category == "Appetizer")
+                                                                    {
+                                                                        <strong>@(orderItem.quantity + "x")</strong> <span>@orderItem.tbl_menu_items.name</span> <br />
+                                                                    }
+                                                                }
+                                                            }
+                                                        </div>
+
+                                                        <strong>Dessert</strong>
+                                                        <div class="mb-2 py-2 ps-3">
+                                                            @{
+                                                                int dessertCount = order.OrderItems.Count(oi => oi.tbl_menu_items.category == "Dessert");
+                                                            }
+
+                                                            @if (dessertCount == 0)
+                                                            {
+                                                                <span class="text-secondary">--</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                foreach (var orderItem in order.OrderItems)
+                                                                {
+                                                                    if (orderItem.tbl_menu_items.category == "Dessert")
+                                                                    {
+                                                                        <strong>@(orderItem.quantity + "x")</strong> <span>@orderItem.tbl_menu_items.name</span> <br />
+                                                                    }
+                                                                }
+                                                            }
+                                                        </div>
+
+                                                        <hr />
+                                                        <strong>Notes</strong>
+                                                        <div class="mb-2 py-2 ps-3">
+                                                            @if (order.Reservation != null)
+                                                            {
+                                                                <span>@order.Reservation.note</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="text-secondary">--</span>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,245 @@
+﻿@model Uling_RestaurantManagementSystem.Models.Custom.PlaceOrderModel
+
+@{
+    ViewBag.Title = "Place Takeout Order";
+}
+
+@Html.Partial("_Navbar")
+
+<div class="container mt-5 pt-sm-5 mb-5">
+    <div class="row mt-5">
+        <div class="col-sm-2 mt-4"></div>
+        <div class="col-sm-6 mt-4">
+            <form action="#" id="takeOutForm">
+                <input type="hidden" name="order_id" id="order_id" value="@Model.Order.order_id" />
+
+                <!-- Full Name -->
+                <div class="row mb-3">
+                    <label for="customer_name" class="col-sm-3 col-form-label">Full Name</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control rounded-corner" name="customer_name" id="customer_name" value="@Model.Order.customer_name">
+                    </div>
+                </div>
+
+                <!-- Contact Number -->
+                <div class="row mb-3">
+                    <label for="contact_number" class="col-sm-3 col-form-label">Contact No.</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control rounded-corner" name="contact_number" id="contact_number" value="@Model.Order.contact_number" maxlength="11">
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="row mb-3">
+                    <label for="email" class="col-sm-3 col-form-label">Email</label>
+                    <div class="col-sm-9">
+                        <input type="email" class="form-control rounded-corner" name="email" id="email" value="@Model.Order.email">
+                    </div>
+                </div>
+
+                <!-- Select Items for Takeout -->
+                <h4 class="mt-4">Select Items for Takeout</h4>
+                <div class="row mb-3">
+                    <div class="col-sm-12">
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="selectedItems" value="@item.menu_item_id" id="item_@item.menu_item_id" checked>
+                                <label class="form-check-label" for="item_@item.menu_item_id">
+                                    @item.tbl_menu_items.name - Quantity: @item.quantity
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Reservation Date -->
+                <div class="row mb-3">
+                    <label for="reservation_date" class="col-sm-3 col-form-label">Reservation Date</label>
+                    <div class="col-sm-9">
+                        <input type="date" class="form-control rounded-corner" name="reservation_date" id="reservation_date">
+                    </div>
+                </div>
+
+                <!-- Start Time -->
+                <div class="row mb-3">
+                    <label for="time_start" class="col-sm-3 col-form-label">Start Time</label>
+                    <div class="col-sm-9">
+                        <input type="time" class="form-control rounded-corner" name="time_start" id="time_start">
+                    </div>
+                </div>
+
+                <!-- End Time -->
+                <div class="row mb-3">
+                    <label for="time_end" class="col-sm-3 col-form-label">End Time</label>
+                    <div class="col-sm-9">
+                        <input type="time" class="form-control rounded-corner" name="time_end" id="time_end">
+                    </div>
+                </div>
+
+                <!-- Heads -->
+                <div class="row mb-3">
+                    <label for="heads" class="col-sm-3 col-form-label">Heads (Optional)</label>
+                    <div class="col-sm-9">
+                        <input type="number" class="form-control rounded-corner" name="heads" id="heads" min="1">
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-urms btn-theme-1 rounded-corner px-5 mt-5">Submit</button>
+            </form>
+        </div>
+        <div class="col-sm-4 mt-4"></div>
+    </div>
+</div>
+
+<!-- Restaurant Reservation Policies Modal -->
+<div class="modal fade" id="restaurantReservationPoliciesModal" tabindex="-1" aria-labelledby="restaurantReservationPoliciesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="restaurantReservationPoliciesModalLabel">Terms and Conditions for Reservations</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>1. Reservation Downpayment</h5>
+                <ul>
+                    <li>A <strong>30% downpayment</strong> is required to confirm your reservation. This amount will be applied toward your total bill.</li>
+                    <li>Payments can only be made via <strong>GCash</strong>, which is the exclusive payment method for reservations.</li>
+                </ul>
+
+                <h5>2. Operating Hours</h5>
+                <ul>
+                    <li>Reservations can be made and orders can be placed between <strong>9:00 AM and 9:00 PM.</strong></li>
+                    <li>The restaurant is open <strong>Tuesday to Sunday. Closed on Mondays.</strong></li>
+                </ul>
+
+                <h5>3. Punctuality</h5>
+                <ul>
+                    <li>Please ensure you arrive at the restaurant on time for your reservation. Delays may affect seating arrangements and service availability.</li>
+                </ul>
+
+                <h5>4. Reservation Cancellation</h5>
+                <ul>
+                    <li>Customers may <strong>cancel their reservation within one day of setting it</strong>. Cancellations after this period will not be eligible for a refund.</li>
+                </ul>
+
+                <h5>5. No-Show Policy and Non-Refundable Payments</h5>
+                <ul>
+                    <li>If the reservation date <strong>exceeds one day</strong> from the date it was set and the customer does not cancel, the <strong>downpayment becomes non-refundable.</strong></li>
+                </ul>
+
+                <p>By proceeding with your reservation, you agree to these Terms and Conditions. If you do not agree, please do not complete the reservation process.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary rounded-corner px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-urms btn-theme-1 rounded-corner px-4" id="btnAgreeTermsAndConditions">Agree</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.Partial("_Footer")
+
+@section Scripts {
+    <script>
+        // Helper functions to handle date and time validation
+        function getTodayDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function isMonday(dateString) {
+            const date = new Date(dateString);
+            return date.getDay() === 1; // 1 represents Monday
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        // Initialize fields
+        const reservationDate = document.getElementById("reservation_date");
+        const timeStart = document.getElementById("time_start");
+        const timeEnd = document.getElementById("time_end");
+
+        // Set minimum date for reservation and prevent Mondays
+        reservationDate.min = getTodayDate();
+
+        reservationDate.addEventListener("change", () => {
+            if (isMonday(reservationDate.value)) {
+                alert("Reservations are not allowed on Mondays. Please select another date.");
+                reservationDate.value = ""; // Clear invalid date
+            } else {
+                validateTimeInputs();
+            }
+        });
+
+        // Set open hours for time fields and validate inputs
+        function validateTimeInputs() {
+            const todayDate = getTodayDate();
+            const currentTime = getCurrentTime();
+
+            // Restrict timeStart and timeEnd to open hours
+            timeStart.min = "09:00"; // Open time: 9:00 AM
+            timeStart.max = "21:00"; // Close time: 9:00 PM
+
+            timeEnd.min = timeStart.value; // End time must be after start time
+
+            // Validate if selected time is after the current time for today
+            if (reservationDate.value === todayDate && timeStart.value < currentTime) {
+                alert("Start time cannot be earlier than the current time.");
+                timeStart.value = currentTime; // Set to current time if invalid
+            }
+        }
+
+        $(document).ready(function () {
+            // Form submission event to show reservation policies modal
+            $("#takeOutForm").submit(function (e) {
+                e.preventDefault();
+                $('#restaurantReservationPoliciesModal').modal('show');
+            });
+
+            // Agree to terms and submit form
+            $("#btnAgreeTermsAndConditions").click(function () {
+                const orderData = {
+                    order_id: $("#order_id").val(),
+                    customer_name: $("#customer_name").val(),
+                    contact_number: $("#contact_number").val(),
+                    email: $("#email").val(),
+                    selectedItems: $("input[name='selectedItems']:checked").map(function () { return this.value; }).get(),
+                    reservation_date: $("#reservation_date").val(),
+                    time_start: $("#time_start").val(),
+                    time_end: $("#time_end").val(),
+                    heads: $("#heads").val(),
+                };
+
+                $.ajax({
+                    url: '@Url.Action("SubmitTakeoutAndReservation", "Main")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(orderData),
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            window.location.href = response.redirectUrl;
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function () {
+                        alert("An error occurred while processing your request.");
+                    }
+                });
+
+                $('#restaurantReservationPoliciesModal').modal('hide');
+            });
+        });
+    </script>
+}

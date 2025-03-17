@@ -1,0 +1,134 @@
+﻿@model Uling_RestaurantManagementSystem.Models.SQL.tbl_users
+
+@{
+    ViewBag.Title = "Edit Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar-->
+    @Html.Partial("_SideBar")
+
+    <!-- Page content wrapper-->
+    <div id="page-content-wrapper">
+        <!-- Top navigation-->
+        @Html.Partial("_Nav")
+
+        <!-- Page content-->
+        <div class="container-fluid">
+            <div class="row px-5 pt-5">
+                <div class="col-sm-12">
+                    <p class="text-secondary" style="font-size: 1.5rem">Account Details</p>
+                </div>
+            </div>
+
+            <div class="row px-5">
+                <div class="col-sm-4">
+                    <form action="#" method="post" id="accountForm">
+                        <input type="hidden" name="user_id" value="@Model.user_id" />
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(m => m.firstname, "First Name")
+                            @Html.TextBoxFor(m => m.firstname, new { @class = "form-control mt-2" })
+                        </div>
+
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(m => m.middlename, "Middle Name")
+                            @Html.TextBoxFor(m => m.middlename, new { @class = "form-control mt-2" })
+                        </div>
+
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(m => m.lastname, "Last Name")
+                            @Html.TextBoxFor(m => m.lastname, new { @class = "form-control mt-2" })
+                        </div>
+
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(m => m.usertype, "User Type")
+                            <select class="form-control mt-2" id="usertype" name="usertype">
+                                @{
+                                    bool isCashierSelected = false;
+                                    bool isCookSelected = false;
+                                    switch (Model.usertype)
+                                    {
+                                        case 2:
+                                            isCashierSelected = true;
+                                            break;
+                                        case 3:
+                                            isCookSelected = true;
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                                <option value="2" selected="@isCashierSelected">Cashier</option>
+                                <option value="3" selected="@isCookSelected">Cook</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(m => m.email, "Email")
+                            @Html.TextBoxFor(m => m.email, new { @class = "form-control mt-2" })
+                        </div>
+
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(m => m.password, "Password")
+                            @Html.TextBoxFor(m => m.password, new { @class = "form-control mt-2", @type = "password" })
+                        </div>
+
+                        <button type="submit" class="btn-urms btn-theme-1 px-3 mt-5">Update</button>
+                    </form>
+                </div>
+                <div class="col-sm-8"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    
+    <script>
+        $("#accountForm").submit(function (e) {
+            e.preventDefault();
+
+            if (
+                $("#firstname").val() == "" ||
+                $("#middlename").val() == "" ||
+                $("#lastname").val() == "" ||
+                $("#usertype").val() == "" ||
+                $("#email").val() == "" ||
+                $("#password").val() == ""
+            ) {
+                alert("Please fill in the fields completely.");
+            }
+            else {
+                // jQuery object for the form
+                var form = $(this);
+                // Serialize the form data
+                var formData = form.serialize();
+
+                $.ajax({
+                    url: '@Url.Action("UpdateAccount", "ManagerAccounts")',
+                    type: 'POST',
+                    data: formData,
+                    success: function (response) {
+
+                        const { success, message } = response;
+
+                        if (success) {
+                            form.trigger('reset');
+                            alert(message);
+
+                            var redirectUrl = '@Url.Action("LoadManagerAccounts", "ManagerAccounts")';
+                            window.location.href = redirectUrl;
+                        } else {
+                            throw new Error("Something went wrong!")
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('An error occurred: ' + error);
+                    }
+                });
+            }
+        })
+    </script>    
+    
+}

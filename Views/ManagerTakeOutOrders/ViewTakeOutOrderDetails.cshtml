@@ -1,0 +1,163 @@
+﻿@model Uling_RestaurantManagementSystem.Models.Custom.TakeOutOrdersDataModel
+@using Uling_RestaurantManagementSystem.Utils.Functions
+
+@{
+    ViewBag.Title = "Reservation Details";
+
+    Globals globals = new Globals();
+}
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar-->
+    @Html.Partial("_SideBar")
+
+    <!-- Page content wrapper-->
+    <div id="page-content-wrapper">
+        <!-- Top navigation-->
+        @Html.Partial("_Nav")
+
+        <!-- Page content-->
+        <div class="container-fluid">
+            <div class="row px-5 pt-5">
+                <div class="col-sm-10">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert" id="statusChangeAlert" style="display: none">
+                        Order status changed successfully
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="col-sm-2"></div>
+                <div class="col-sm-12">
+                    <p class="text-secondary" style="font-size: 1.5rem">Order Details</p>
+                </div>
+            </div>
+
+            <div class="row px-5">
+                <div class="col-sm-4">
+                    <dl class="row">
+                        <dt class="col-sm-4 mt-1">Customer Name</dt>
+                        <dd class="col-sm-8 mt-1">@Model.Order.customer_name</dd>
+
+                        <dt class="col-sm-4">Contact No.</dt>
+                        <dd class="col-sm-8">@Model.Order.contact_number</dd>
+
+                        <dt class="col-sm-4">Email</dt>
+                        <dd class="col-sm-8">@Model.Order.email</dd>
+
+                        <dt class="col-sm-4">Date Ordered</dt>
+                        <dd class="col-sm-8">@Model.Order.date_ordered.ToString("MMMM d, yyyy - h:mm tt")</dd>
+
+                        @{
+                            string status = Model.Order.order_status;
+                        }
+
+                        <dt class="col-sm-4">Order Status</dt>
+                        <dd class="col-sm-8"><span class="badge rounded-pill @globals.GetTakeOutOrderBadgeClass(status)">@status</span></dd>
+                    </dl>
+                </div>
+                <div class="col-sm-6 bg-light py-4 px-5 rounded-corner">
+                    <dl class="row mt-2">
+                        <dt class="col-sm-4">Menu</dt>
+                        <dt class="col-sm-3">Category</dt>
+                        <dt class="col-sm-2">Quantity</dt>
+                        <dt class="col-sm-3">Total</dt>
+                    </dl>
+                    <dl class="row" id="orderItemList">
+                        @{
+                            decimal subTotal = 0;
+                            if (Model != null && !Model.OrderItems.Any())
+                            {
+                                <dd class="col-sm-12 text-secondary text-center">-- no orders --</dd>
+                            }
+                            else
+                            {
+                                foreach (var item in Model.OrderItems)
+                                {
+                                    subTotal += Convert.ToDecimal(item.line_price);
+
+                                    string itemQuantity = item.quantity + "x";
+                                    string linePrice = Convert.ToDecimal(item.line_price).ToString("F2");
+
+                                    <dd class="col-sm-4">@item.tbl_menu_items.name</dd>
+                                    <dd class="col-sm-3">@item.tbl_menu_items.category</dd>
+                                    <dd class="col-sm-2">@itemQuantity </dd>
+                                    <dd class="col-sm-3">₱ @linePrice</dd>
+                                }
+                            }
+                        }
+                    </dl>
+
+                    <hr />
+                    <dl class="row">
+                        <dt class="col-sm-9 text-end">Subtotal: </dt>
+                        <dd class="col-sm-3">
+                            ₱ @subTotal.ToString("F2")
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-sm-2"></div>
+            </div>
+
+            <div class="row px-5 pt-2">
+                <div class="col-sm-12">
+                    <p class="text-secondary" style="font-size: 1.5rem">Payment Details</p>
+                </div>
+            </div>
+
+            <div class="row px-5">
+                <div class="col-sm-4">
+                    <dl class="row">
+                        <dt class="col-sm-4">Payment Slip</dt>
+                        <dd class="col-sm-8">
+                            <fieldset class="mt-3 rounded-3 p-2" id="fs_project_img" style="border: 1px solid #e0e0e0">
+                                <img class="card-img-top" src="@Model.Payment.payment_url" alt="default image" id="image_preview">
+                                <input type="hidden" id="txt_base_64" value="">
+                            </fieldset>
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-sm-8">
+                </div>
+            </div>
+
+            @if (Model.Order.order_status == "Pending" && Model.Payment.payment_status == "Pending")
+            {
+                <div class="row px-5 mb-5 pb-5">
+                    <div class="col-sm-12">
+                        <div class="mt-5" style="display: flex; gap: 6px">
+                            <form action="@Url.Action("UpdateTakeOutOrderStatus", "ManagerTakeOutOrders")" method="post">
+                                <input type="hidden" name="order_id" value="@Model.Order.order_id" />
+                                <input type="hidden" name="order_status" value="Accepted" />
+                                <button type="submit" class="btn-urms btn-theme-1 rounded-corner px-4">Accept</button>
+                            </form>
+                            <form action="@Url.Action("UpdateTakeOutOrderStatus", "ManagerTakeOutOrders")" method="post">
+                                <input type="hidden" name="order_id" value="@Model.Order.order_id" />
+                                <input type="hidden" name="order_status" value="Declined" />
+                                <button type="submit" class="btn btn-secondary rounded-corner px-4">Decline</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+         $(document).ready(function () {
+            checkSessionData();
+        });
+
+        function checkSessionData() {
+            var statusChangeMessage = '@TempData["statusChangeMessage"]';
+
+            if (statusChangeMessage != "") {
+                $("#statusChangeAlert").show();
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            }
+        }
+    </script>
+}

@@ -1,0 +1,142 @@
+﻿@model Uling_RestaurantManagementSystem.Models.Custom.PlaceOrderModel
+@using Uling_RestaurantManagementSystem.Utils.Functions
+
+@{
+    ViewBag.Title = "Order Details";
+
+    Globals globals = new Globals();
+}
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar-->
+    @Html.Partial("_SideBar")
+
+    <!-- Page content wrapper-->
+    <div id="page-content-wrapper">
+        <!-- Top navigation-->
+        @Html.Partial("_Nav")
+
+        <!-- Page content-->
+        <div class="container-fluid">
+            <div class="row px-5 pt-5">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-12">
+                    <p class="text-secondary" style="font-size: 1.5rem">Order Details</p>
+                </div>
+            </div>
+
+            <div class="row px-5">
+                <div class="col-sm-4">
+                    <dl class="row">
+                        <dt class="col-sm-3 mt-1">Customer Name</dt>
+                        <dd class="col-sm-9 mt-1">@Model.Order.customer_name</dd>
+
+                        <dt class="col-sm-3">Contact No.</dt>
+                        <dd class="col-sm-9">@Model.Order.contact_number</dd>
+
+                        <dt class="col-sm-3">Email</dt>
+                        <dd class="col-sm-9">@Model.Order.email</dd>
+
+                        <dt class="col-sm-3">Total Amount</dt>
+                        <dd class="col-sm-9">₱ @Model.Order.total_amount.ToString("F2")</dd>
+
+                        <dt class="col-sm-3">Date Ordered</dt>
+                        <dd class="col-sm-9">@Model.Order.date_ordered.ToString("MMMM d, yyyy - h:mm tt")</dd>
+
+                        <dt class="col-sm-3">Order Status</dt>
+                        <dd class="col-sm-9"><span class="badge rounded-pill @globals.GetTakeOutOrderBadgeClass(Model.Order.order_status)">@Model.Order.order_status</span></dd>
+                    </dl>
+                    @if (Model.Order.order_status != "Cancelled")
+                    {
+                        <form action="#" method="post" class="mt-5" id="cancelOrderForm">
+                            <input type="hidden" name="order_id" id="input_order_id" value="@Model.Order.order_id" />
+                            <button type="submit" class="btn btn-secondary">Cancel Order</button>
+                        </form>
+                    }
+                </div>
+                <div class="col-sm-6 bg-light py-4 px-5 rounded-corner">
+                    <dl class="row mt-2">
+                        <dt class="col-sm-4">Menu</dt>
+                        <dt class="col-sm-3">Category</dt>
+                        <dt class="col-sm-2">Quantity</dt>
+                        <dt class="col-sm-3">Total</dt>
+                    </dl>
+                    <dl class="row" id="orderItemList">
+                        @{
+                            decimal subTotal = 0;
+                            if (Model != null && !Model.OrderItems.Any())
+                            {
+                                <dd class="col-sm-12 text-secondary text-center">-- no orders --</dd>
+                            }
+                            else
+                            {
+                                foreach (var item in Model.OrderItems)
+                                {
+                                    subTotal += Convert.ToDecimal(item.line_price);
+
+                                    string itemQuantity = item.quantity + "x";
+                                    string linePrice = Convert.ToDecimal(item.line_price).ToString("F2");
+
+                                    <dd class="col-sm-4">@item.tbl_menu_items.name</dd>
+                                    <dd class="col-sm-3">@item.tbl_menu_items.category</dd>
+                                    <dd class="col-sm-2">@itemQuantity </dd>
+                                    <dd class="col-sm-3">₱ @linePrice</dd>
+                                }
+                            }
+                        }
+                    </dl>
+
+                    <hr />
+                    <dl class="row">
+                        <dt class="col-sm-9 text-end">Subtotal: </dt>
+                        <dd class="col-sm-3">
+                            ₱ @subTotal.ToString("F2")
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-sm-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        $('#cancelOrderForm').submit(function (e) {
+            e.preventDefault();
+
+            if ($('#input_order_id').val() == "") {
+                alert("Unable to cancel order");
+            }
+            else {
+                // jQuery object for the form
+                var form = $(this);
+                // Serialize the form data
+                var formData = form.serialize();
+
+                $.ajax({
+                    url: '@Url.Action("CancelCounterOrder", "ManagerCounterOrders")',
+                    type: 'POST',
+                    data: formData,
+                    success: function (response) {
+
+                        const { success, message } = response;
+
+                        if (success) {
+                            form.trigger('reset');
+                            alert(message);
+
+                            var redirectUrl = '@Url.Action("LoadManagerCounterOrders", "ManagerCounterOrders")';
+                            window.location.href = redirectUrl;
+                        } else {
+                            throw new Error("Something went wrong!")
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('An error occurred: ' + error);
+                    }
+                });
+            }
+        })
+    </script>
+}

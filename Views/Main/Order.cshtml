@@ -1,0 +1,661 @@
+﻿@model IEnumerable<Uling_RestaurantManagementSystem.Models.SQL.tbl_menu_items>
+@using Uling_RestaurantManagementSystem.Models.Custom
+
+@{
+    ViewBag.Title = "Order";
+}
+
+@Html.Partial("_Navbar")
+
+<div class="container mt-5 pt-sm-5 mb-5">
+    <div class="row">
+        @*show in mobile view*@
+        <div class="col-sm-4 d-block d-md-none">
+            <div class="bg-light mt-3 py-4 ps-4 pe-5 rounded-corner">
+                <small class="text-secondary">Order Details</small>
+
+                <table class="table table-responsive">
+                    <thead>
+                        <tr>
+                            <th>menu</th>
+                            <th>qty</th>
+                            <th>total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var existingOrderItems = Session["OrderItems"] as List<OrderItemModel> ?? new List<OrderItemModel>();
+                            var countOrderItems = existingOrderItems.Count();
+                            decimal subTotal = 0;
+
+                            if (existingOrderItems.Count() == 0)
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center text-secondary">-- no orders --</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var item in existingOrderItems)
+                                {
+                                    subTotal += Convert.ToDecimal(item.LineTotal);
+
+                                    string itemQuantity = item.Quantity + "x";
+                                    string linePrice = Convert.ToDecimal(item.LineTotal).ToString("F2");
+
+                                    <tr>
+                                        <td>@item.MenuName</td>
+                                        <td>@itemQuantity</td>
+                                        <td>₱ @linePrice</td>
+                                        <td>
+                                            <small class="text-theme-1 me-3" style="cursor: pointer" onclick="removeMenuItem(@item.MenuItemId)">Remove</small>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                    @if (countOrderItems > 0)
+                    {
+                        <caption>
+                            Subtotal: <span class="font-weight-600">₱ @subTotal.ToString("F2")</span>
+                        </caption>
+                    }
+                </table>
+
+                @if (countOrderItems > 0)
+                {
+                    <hr />
+                    <dl class="row">
+                        <dt class="col-sm-6 text-end">Subtotal: </dt>
+                        <dd class="col-sm-6">
+                            ₱ @subTotal.ToString("F2")
+                        </dd>
+                    </dl>
+                }
+
+                <div>
+                    @if (countOrderItems > 0)
+                    {
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="radio" name="orderTypeMobile" id="flexRadioDefault1Mobile" value="reservation" checked>
+                            <label class="form-check-label" for="flexRadioDefault1Mobile">
+                                For Reservation
+                            </label>
+                        </div>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="radio" name="orderTypeMobile" id="flexRadioDefault2Mobile" value="takeout">
+                            <label class="form-check-label" for="flexRadioDefault2Mobile">
+                                For Take Out
+                            </label>
+                        </div>
+
+                        <div class="mt-4">
+                            <form action="@Url.Action("PlaceOrder", "Main")" method="post" id="forReservationFormMobile">
+                                <input type="hidden" name="order_type" value="reservation" />
+                                <div class="text-end">
+                                    <button type="submit" class="btn-urms btn-theme-1 rounded-corner px-5">Reservation</button>
+                                </div>
+                            </form>
+                            <form action="@Url.Action("PlaceOrder", "Main")" method="post" id="forTakeOutFormMobile">
+                                <small class="text-secondary">Customer Details</small>
+                                <input type="hidden" name="order_type" value="takeout" />
+
+                                <div class="mb-1 mt-2">
+                                    <label for="customer_name" class="form-label ms-1">Name</label>
+                                    <input type="text" class="form-control rounded-corner" name="customer_name" id="customer_name">
+                                </div>
+                                <div class="mb-1">
+                                    <label for="contact_number" class="form-label ms-1">Contact</label>
+                                    <input type="text" class="form-control rounded-corner" name="contact_number" id="contact_number">
+                                </div>
+                                <div class="mb-1">
+                                    <label for="email" class="form-label ms-1">Email</label>
+                                    <input type="text" class="form-control rounded-corner" name="email" id="email">
+                                </div>
+
+                                <div class="text-end">
+                                    <button type="submit" class="btn-urms btn-theme-1 rounded-corner px-5 mt-4">Take Out</button>
+                                </div>
+                            </form>
+                        </div>
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-sm-8">
+
+            @* Main Course *@
+            <h1 class="font-weight-600 text-theme-1 text-center mt-5">Main Course</h1>
+            <div class="bg-light mt-3 py-4 ps-4 pe-4 rounded-corner">
+                <select class="form-select form-select-lg" id="select_main_course">
+                    <option value="" selected>Select main course menu...</option>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            if (item.category == "Main Course")
+                            {
+                                <option value="@item.menu_item_id"
+                                        item-name="@item.name"
+                                        item-desc="@item.description"
+                                        item-price="@item.price.ToString("F2")"
+                                        item-status="@(item.is_available.HasValue && item.is_available.Value ? "1" : "0")">
+                                    @item.name
+                                </option>
+                            }
+                        }
+                    }
+                </select>
+
+                <div class="row gx-3 gy-2 mt-2 align-items-center">
+                    <div class="col-sm-5 px-md-4">
+                        <span id="text_main_item_name">-</span> <br />
+                        <small id="text_main_item_desc">-</small> <br />
+                        <span class="mt-3" id="text_main_item_availability">-</span>
+                    </div>
+                    <div class="col-sm-2 text-md-center">₱ <span id="text_main_item_price">--.--</span></div>
+                    <div class="col-sm-3" id="main_quantity_container" style="display: none">
+                        <input type="number" class="form-control" id="text_main_item_quantity" value="1" aria-label="Quantity">
+                    </div>
+                    <div class="col-sm-2 text-md-end" id="main_button_container" style="display: none">
+                        <input type="hidden" id="text_main_item_id" />
+                        <button type="button" class="btn-urms btn-outline-urms rounded-corner ms-sm-3 px-4" onclick="addToCart('main')">Add</button>
+                    </div>
+                </div>
+            </div>
+
+            @* Dessert *@
+            <h1 class="font-weight-600 text-theme-1 text-center mt-5">Dessert</h1>
+            <div class="bg-light mt-3 py-4 ps-4 pe-4 rounded-corner">
+                <select class="form-select form-select-lg" id="select_dessert">
+                    <option value="" selected>Select dessert menu...</option>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            if (item.category == "Dessert")
+                            {
+                                <option value="@item.menu_item_id"
+                                        item-name="@item.name"
+                                        item-desc="@item.description"
+                                        item-price="@item.price.ToString("F2")"
+                                        item-status="@(item.is_available.HasValue && item.is_available.Value ? "1" : "0")">
+                                    @item.name
+                                </option>
+                            }
+                        }
+                    }
+                </select>
+
+                <div class="row gx-3 gy-2 mt-2 align-items-center">
+                    <div class="col-sm-5 px-md-4">
+                        <span id="text_dessert_item_name">-</span> <br />
+                        <small id="text_dessert_item_desc">-</small> <br />
+                        <span class="mt-3" id="text_dessert_item_availability">-</span>
+                    </div>
+                    <div class="col-sm-2 text-md-center">₱ <span id="text_dessert_item_price">--.--</span></div>
+                    <div class="col-sm-3" id="dessert_quantity_container" style="display: none">
+                        <input type="number" class="form-control" id="text_dessert_item_quantity" value="1" aria-label="Quantity">
+                    </div>
+                    <div class="col-sm-2 text-md-end" id="dessert_button_container" style="display: none">
+                        <input type="hidden" id="text_dessert_item_id" />
+                        <button type="button" class="btn-urms btn-outline-urms rounded-corner ms-sm-3 px-4" onclick="addToCart('dessert')">Add</button>
+                    </div>
+                </div>
+            </div>
+
+            @* Drinks *@
+            <h1 class="font-weight-600 text-theme-1 text-center mt-5">Drinks</h1>
+            <div class="bg-light mt-3 py-4 ps-4 pe-4 rounded-corner">
+                <select class="form-select form-select-lg" id="select_drinks">
+                    <option value="" selected>Select drink menu...</option>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            if (item.category == "Drinks")
+                            {
+                                <option value="@item.menu_item_id"
+                                        item-name="@item.name"
+                                        item-desc="@item.description"
+                                        item-price="@item.price.ToString("F2")"
+                                        item-status="@(item.is_available.HasValue && item.is_available.Value ? "1" : "0")">
+                                    @item.name
+                                </option>
+                            }
+                        }
+                    }
+                </select>
+
+                <div class="row gx-3 gy-2 mt-2 align-items-center">
+                    <div class="col-sm-5 px-md-4">
+                        <span id="text_drink_item_name">-</span> <br />
+                        <small id="text_drink_item_desc">-</small> <br />
+                        <span class="mt-3" id="text_drink_item_availability">-</span>
+                    </div>
+                    <div class="col-sm-2 text-md-center">₱ <span id="text_drink_item_price">--.--</span></div>
+                    <div class="col-sm-3" id="drink_quantity_container" style="display: none">
+                        <input type="number" class="form-control" id="text_drink_item_quantity" value="1" aria-label="Quantity">
+                    </div>
+                    <div class="col-sm-2 text-md-end" id="drink_button_container" style="display: none">
+                        <input type="hidden" id="text_drink_item_id" />
+                        <button type="button" class="btn-urms btn-outline-urms rounded-corner ms-sm-3 px-4" onclick="addToCart('drink')">Add</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        @*show in desktop view*@
+        <div class="col-sm-4 d-none d-md-block mt-5 pt-3">
+            <div class="bg-light mt-5 py-4 ps-4 pe-5 rounded-corner">
+                <small class="text-secondary">Order Details</small>
+
+                <dl class="row mt-2">
+                    <dt class="col-sm-4">menu</dt>
+                    <dt class="col-sm-2">qty</dt>
+                    <dt class="col-sm-4">total</dt>
+                    <dt class="col-sm-2"></dt>
+                </dl>
+                <dl class="row" id="orderItemList">
+                    @{
+                        var existingOrderItemss = Session["OrderItems"] as List<OrderItemModel> ?? new List<OrderItemModel>();
+                        var countOrderItemss = existingOrderItemss.Count();
+                        decimal subTotals = 0;
+
+                        if (existingOrderItemss.Count() == 0)
+                        {
+                            <dd class="col-sm-12 text-secondary text-center">-- no orders --</dd>
+                        }
+                        else
+                        {
+                            foreach (var item in existingOrderItemss)
+                            {
+                                subTotals += Convert.ToDecimal(item.LineTotal);
+
+                                string itemQuantity = item.Quantity + "x";
+                                string linePrice = Convert.ToDecimal(item.LineTotal).ToString("F2");
+
+                                <dd class="col-sm-4">@item.MenuName</dd>
+                                <dd class="col-sm-2">@itemQuantity </dd>
+                                <dd class="col-sm-4">₱ @linePrice</dd>
+                                <dd class="col-sm-2">
+                                    <small class="text-theme-1 me-3" style="cursor: pointer" onclick="removeMenuItem(@item.MenuItemId)">Remove</small>
+                                </dd>
+                            }
+                        }
+                    }
+                </dl>
+
+                @if (countOrderItemss > 0)
+                {
+                    <hr />
+                    <dl class="row">
+                        <dt class="col-sm-6 text-end">Subtotal: </dt>
+                        <dd class="col-sm-6">
+                            ₱ @subTotals.ToString("F2")
+                        </dd>
+                    </dl>
+                }
+
+            <div>
+                @if (countOrderItemss > 0)
+                {
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="radio" name="orderType" id="flexRadioDefault1" value="reservation" checked>
+                        <label class="form-check-label" for="flexRadioDefault1">
+                            For Reservation
+                        </label>
+                    </div>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="radio" name="orderType" id="flexRadioDefault2" value="takeout">
+                        <label class="form-check-label" for="flexRadioDefault2">
+                            For Take Out
+                        </label>
+                    </div>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="radio" name="orderType" id="flexRadioDefault3" value="reservation_takeout">
+                        <label class="form-check-label" for="flexRadioDefault3">
+                            For Reservation & Take Out
+                        </label>
+                    </div>
+
+                    <div class="mt-4">
+                        <form action="@Url.Action("PlaceOrder", "Main")" method="post" id="forReservationForm">
+                            <input type="hidden" name="order_type" value="reservation" />
+                            <div class="text-end">
+                                <button type="submit" class="btn-urms btn-theme-1 rounded-corner px-5">Reservation</button>
+                            </div>
+                        </form>
+                        <form action="@Url.Action("PlaceOrder", "Main")" method="post" id="forReservationTakeOutForm">
+                            <input type="hidden" name="order_type" value="reservationtakeout" />
+                            <div class="text-end">
+                                <button type="submit" class="btn-urms btn-theme-1 rounded-corner px-5">Reservation & Take Out</button>
+                            </div>
+                        </form>
+                        <form action="@Url.Action("PlaceOrder", "Main")" method="post" id="forTakeOutForm">
+                            <small class="text-secondary">Customer Details</small>
+                            <input type="hidden" name="order_type" value="takeout" />
+
+                            <div class="mb-1 mt-2">
+                                <label for="customer_name" class="form-label ms-1">Name</label>
+                                <input type="text" class="form-control rounded-corner" name="customer_name" id="customer_name">
+                            </div>
+                            <div class="mb-1">
+                                <label for="contact_number" class="form-label ms-1">Contact</label>
+                                <input type="text" class="form-control rounded-corner" name="contact_number" id="contact_number">
+                            </div>
+                            <div class="mb-1">
+                                <label for="email" class="form-label ms-1">Email</label>
+                                <input type="text" class="form-control rounded-corner" name="email" id="email">
+                            </div>
+
+                            <div class="text-end">
+                                <button type="submit" class="btn-urms btn-theme-1 rounded-corner px-5 mt-4">Take Out</button>
+                            </div>
+                        </form>
+                    </div>
+                }
+            </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.Partial("_Footer")
+
+@section Scripts{
+    @* [Main Course] dropdown functionality script *@
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectMainCourse = document.getElementById('select_main_course');
+
+            selectMainCourse.addEventListener('change', function () {
+                const selectedOption = selectMainCourse.options[selectMainCourse.selectedIndex];
+
+                // Get the data attributes
+                const itemValue = selectedOption.getAttribute('value');
+                const itemName = selectedOption.getAttribute('item-name');
+                const itemDesc = selectedOption.getAttribute('item-desc');
+                const itemPrice = selectedOption.getAttribute('item-price');
+                const itemStatus = selectedOption.getAttribute('item-status');
+
+                // Populate the corresponding text elements
+                $('#text_main_item_id').val(itemValue);
+                document.getElementById('text_main_item_name').textContent = itemName || 'Select main course menu';
+                document.getElementById('text_main_item_desc').textContent = itemDesc || '';
+
+                const availabilitySpan = document.getElementById('text_main_item_availability');
+                const quantityContainer = document.getElementById('main_quantity_container');
+                const buttonContainer = document.getElementById('main_button_container');
+
+                if (itemStatus === "1") {
+                    availabilitySpan.textContent = "Available";
+                    availabilitySpan.classList.remove('text-danger');
+                    availabilitySpan.classList.add('text-success');
+
+                    // Show quantity and button containers
+                    quantityContainer.style.display = 'block';
+                    buttonContainer.style.display = 'block';
+                } else {
+                    availabilitySpan.textContent = "Out of order";
+                    availabilitySpan.classList.remove('text-success');
+                    availabilitySpan.classList.add('text-danger');
+
+                    // Hide quantity and button containers
+                    quantityContainer.style.display = 'none';
+                    buttonContainer.style.display = 'none';
+                }
+
+                // Update the price
+                document.getElementById('text_main_item_price').textContent = itemPrice || '0.00';
+            });
+        });
+
+    </script>
+
+    @* [Dessert] dropdown functionality script *@
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectDessert = document.getElementById('select_dessert');
+
+            selectDessert.addEventListener('change', function () {
+                const selectedDessertOption = selectDessert.options[selectDessert.selectedIndex];
+
+                // Get the data attributes
+                const itemDessertValue = selectedDessertOption.getAttribute('value');
+                const itemDessertName = selectedDessertOption.getAttribute('item-name');
+                const itemDessertDesc = selectedDessertOption.getAttribute('item-desc');
+                const itemDessertPrice = selectedDessertOption.getAttribute('item-price');
+                const itemDessertStatus = selectedDessertOption.getAttribute('item-status');
+
+                // Populate the corresponding text elements
+                $('#text_dessert_item_id').val(itemDessertValue);
+                document.getElementById('text_dessert_item_name').textContent = itemDessertName || 'Select dessert menu';
+                document.getElementById('text_dessert_item_desc').textContent = itemDessertDesc || '';
+
+                const availabilityDessertSpan = document.getElementById('text_dessert_item_availability');
+                const quantityDessertContainer = document.getElementById('dessert_quantity_container');
+                const buttonDessertContainer = document.getElementById('dessert_button_container');
+
+                if (itemDessertStatus === "1") {
+                    availabilityDessertSpan.textContent = "Available";
+                    availabilityDessertSpan.classList.remove('text-danger');
+                    availabilityDessertSpan.classList.add('text-success');
+
+                    // Show quantity and button containers
+                    quantityDessertContainer.style.display = 'block';
+                    buttonDessertContainer.style.display = 'block';
+                } else {
+                    availabilityDessertSpan.textContent = "Out of order";
+                    availabilityDessertSpan.classList.remove('text-success');
+                    availabilityDessertSpan.classList.add('text-danger');
+
+                    // Hide quantity and button containers
+                    quantityDessertContainer.style.display = 'none';
+                    buttonDessertContainer.style.display = 'none';
+                }
+
+                // Update the price
+                document.getElementById('text_dessert_item_price').textContent = itemDessertPrice || '0.00';
+            });
+        });
+
+    </script>
+
+    @* [Drinks] dropdown functionality script *@
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectDrink = document.getElementById('select_drinks');
+
+            selectDrink.addEventListener('change', function () {
+                const selectedDrinkOption = selectDrink.options[selectDrink.selectedIndex];
+
+                // Get the data attributes
+                const itemDrinkValue = selectedDrinkOption.getAttribute('value');
+                const itemDrinkName = selectedDrinkOption.getAttribute('item-name');
+                const itemDrinkDesc = selectedDrinkOption.getAttribute('item-desc');
+                const itemDrinkPrice = selectedDrinkOption.getAttribute('item-price');
+                const itemDrinkStatus = selectedDrinkOption.getAttribute('item-status');
+
+                // Populate the corresponding text elements
+                $('#text_drink_item_id').val(itemDrinkValue);
+                document.getElementById('text_drink_item_name').textContent = itemDrinkName || 'Select drink menu';
+                document.getElementById('text_drink_item_desc').textContent = itemDrinkDesc || '';
+
+                const availabilityDrinkSpan = document.getElementById('text_drink_item_availability');
+                const quantityDrinkContainer = document.getElementById('drink_quantity_container');
+                const buttonDrinkContainer = document.getElementById('drink_button_container');
+
+                if (itemDrinkStatus === "1") {
+                    availabilityDrinkSpan.textContent = "Available";
+                    availabilityDrinkSpan.classList.remove('text-danger');
+                    availabilityDrinkSpan.classList.add('text-success');
+
+                    // Show quantity and button containers
+                    quantityDrinkContainer.style.display = 'block';
+                    buttonDrinkContainer.style.display = 'block';
+                } else {
+                    availabilityDrinkSpan.textContent = "Out of order";
+                    availabilityDrinkSpan.classList.remove('text-success');
+                    availabilityDrinkSpan.classList.add('text-danger');
+
+                    // Hide quantity and button containers
+                    quantityDrinkContainer.style.display = 'none';
+                    buttonDrinkContainer.style.display = 'none';
+                }
+
+                // Update the price
+                document.getElementById('text_drink_item_price').textContent = itemDrinkPrice || '0.00';
+            });
+        });
+
+    </script>
+
+    <script>
+        $(document).ready(function () {
+
+            // Function to toggle forms based on selected radio button
+            function toggleForms() {
+                if ($('#flexRadioDefault1').is(':checked')) {
+                    $('#forReservationForm').show();
+                    $('#forReservationTakeOutForm').hide();
+                    $('#forTakeOutForm').hide();
+                }
+                else if ($('#flexRadioDefault3').is(':checked'))
+                {
+                    $('#forReservationForm').hide();
+                    $('#forReservationTakeOutForm').show();
+                    $('#forTakeOutForm').hide();
+                }
+                else {
+                    $('#forReservationForm').hide();
+                    $('#forReservationTakeOutForm').hide();
+                    $('#forTakeOutForm').show();
+                }
+            }
+
+            // Initialize on page load
+            toggleForms();
+
+            // Attach event handlers
+            $('input[name="orderType"]').change(function () {
+                toggleForms();
+            });
+
+            // FOR MOBILE VIEW
+
+            // Function to toggle forms based on selected radio button
+            function toggleFormsMobile() {
+                if ($('#flexRadioDefault1Mobile').is(':checked')) {
+                    $('#forReservationFormMobile').show();
+                    $('#forTakeOutFormMobile').hide();
+                } else {
+                    $('#forReservationFormMobile').hide();
+                    $('#forTakeOutFormMobile').show();
+                }
+            }
+
+            // Initialize on page load
+            toggleFormsMobile();
+
+            // Attach event handlers
+            $('input[name="orderTypeMobile"]').change(function () {
+                toggleFormsMobile();
+            });
+        });
+
+        @*function addToCart(menu_item_id) {
+            $quantity = $("input[menu-item-id = '" + menu_item_id + "']").val();
+
+            if (parseInt($quantity) <= 0 || $quantity == "") {
+                alert("Please enter a valid quantity.");
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("AddToCart", "Main")',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    menu_item_id: menu_item_id,
+                    quantity: $quantity
+                }),
+                success: function (response) {
+                    if (!response) {
+                        alert(response.message);
+                    }
+                    else {
+                        window.location.reload();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log("Something went wrong in adding an item to cart.");
+                }
+            });
+        }*@
+
+        function addToCart(menu_category) {
+            var menu_item_id = parseInt($('#text_' + menu_category + '_item_id').val());
+            var order_item_quantity = $('#text_' + menu_category + '_item_quantity').val();
+
+            if (parseInt(order_item_quantity) <= 0 || order_item_quantity == "") {
+                alert("Please enter a valid quantity.");
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("AddToCart", "Main")',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    menu_item_id: menu_item_id,
+                    quantity: parseInt(order_item_quantity)
+                }),
+                success: function (response) {
+                    if (!response) {
+                        alert(response.message);
+                    }
+                    else {
+                        window.location.reload();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log("Something went wrong in adding an item to cart.");
+                }
+            });
+        }
+
+        function removeMenuItem(menu_item_id) {
+            $.ajax({
+                url: '@Url.Action("RemoveToCart", "Main")',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    menu_item_id: menu_item_id
+                }),
+                success: function (response) {
+                    if (!response) {
+                        alert(response.message);
+                    }
+                    else {
+                        window.location.reload();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log("Something went wrong in removing an item to cart.");
+                }
+            });
+        }
+    </script>
+}

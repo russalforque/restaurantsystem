@@ -1,0 +1,87 @@
+﻿@model Uling_RestaurantManagementSystem.Models.SQL.tbl_users
+
+@{
+    ViewBag.Title = "Account Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar-->
+    @Html.Partial("_SideBar")
+
+    <!-- Page content wrapper-->
+    <div id="page-content-wrapper">
+        <!-- Top navigation-->
+        @Html.Partial("_Nav")
+
+        <!-- Page content-->
+        <div class="container-fluid">
+            <div class="row px-5 pt-5">
+                <div class="col-sm-12">
+                    <p class="text-secondary" style="font-size: 1.5rem">Account Details</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+
+                    <div class="mt-4 mx-4">
+                        <dl class="row mt-4">
+                            <dt class="col-sm-2">First Name</dt>
+                            <dd class="col-sm-10">@Model.firstname</dd>
+
+                            <dt class="col-sm-2">Middle Name</dt>
+                            <dd class="col-sm-10">@Model.middlename</dd>
+
+                            <dt class="col-sm-2">Last Name</dt>
+                            <dd class="col-sm-10">@Model.lastname</dd>
+
+                            @{
+                                string userType = "";
+                                switch (Model.usertype)
+                                {
+                                    case 2:
+                                        userType = "Cashier";
+                                        break;
+                                    case 3:
+                                        userType = "Cook";
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+
+                            <dt class="col-sm-2">User Type</dt>
+                            <dd class="col-sm-10">@userType</dd>
+
+                            <dt class="col-sm-2">Email</dt>
+                            <dd class="col-sm-10">@Model.email</dd>
+
+                            <dt class="col-sm-2">Password</dt>
+                            <dd class="col-sm-10">
+                                <input type="password" id="passwordInput" value="@Model.password" readonly style="border:none; background: none; font-weight: 500; font-size: 1.1rem;" />
+                                <br />
+                                <i class="fas fa-eye" id="togglePassword" style="cursor: pointer;"></i>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    
+    <script type="text/javascript">
+        document.getElementById("togglePassword").addEventListener("click", function () {
+        const passwordInput = document.getElementById("passwordInput");
+        const isPassword = passwordInput.type === "password";
+        passwordInput.type = isPassword ? "text" : "password";
+
+        // Toggle eye icon
+        this.classList.toggle("fa-eye");
+        this.classList.toggle("fa-eye-slash");
+    });</script>
+
+}

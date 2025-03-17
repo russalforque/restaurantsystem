@@ -1,0 +1,29 @@
+﻿@{ 
+    var firstName = "";
+    var lastname = "";
+    var email = "";
+
+    if(Session["firstname"] != null && Session["lastname"] != null && Session["email"] != null)
+    {
+        firstName = Session["firstname"].ToString();
+        lastname = Session["lastname"].ToString();
+        email = Session["email"].ToString();
+    }
+}
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-sm-3">
+    <div class="container-fluid">
+        <button class="btn btn-default mx-2" id="sidebarToggle"><i class="fas fa-bars text-dark"></i></button>
+
+        <span class="ms-sm-2 text-dark font-weight-600">@firstName @lastname</span> 
+        &nbsp; <span class="font-weight-600 text-secondary">|</span> &nbsp;
+        <span class="ml-3 text-dark">@email</span>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto mt-2 mt-lg-0 mx-4 my-2">
+                <li class="nav-item dropdown mt-2">
+                    @*<span class="mt-2">Account Name</span>*@
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

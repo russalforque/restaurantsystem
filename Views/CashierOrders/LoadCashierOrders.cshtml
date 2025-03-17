@@ -1,0 +1,149 @@
+﻿@model IEnumerable<Uling_RestaurantManagementSystem.Models.SQL.tbl_orders>
+
+@{
+    ViewBag.Title = "Orders";
+}
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar-->
+    @Html.Partial("_SideBar")
+
+    <!-- Page content wrapper-->
+    <div id="page-content-wrapper">
+        <!-- Top navigation-->
+        @Html.Partial("_Nav")
+
+        <!-- Page content-->
+        <div class="container-fluid">
+            <div class="row px-5 pt-5">
+                <div class="col-sm-12">
+                    <p class="text-secondary" style="font-size: 1.5rem">Orders</p>
+                </div>
+            </div>
+            <div class="row px-5">
+                <div class="col-sm-12">
+                    <!-- Navigation Tabs -->
+                    <ul class="nav nav-tabs mt-3" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active"
+                               id="order-queue-tab"
+                               data-bs-toggle="tab"
+                               href="#order-queue"
+                               role="tab"
+                               aria-controls="order-queue"
+                               aria-selected="true">Pending Orders</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link"
+                               id="to-serve-tab"
+                               data-bs-toggle="tab"
+                               href="#to-serve"
+                               role="tab"
+                               aria-controls="to-serve"
+                               aria-selected="false">Served Orders</a>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="myTabContent">
+                        <!-- ORDER QUEUE TAB -->
+                        <div class="tab-pane fade show active" id="order-queue" role="tabpanel" aria-labelledby="order-queue-tab">
+                            <div class="row px-5">
+                                <div class="col-sm-12">
+                                    <table class="table table-responsive table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Customer</th>
+                                                <th>Total Amount</th>
+                                                <th>Date Ordered</th>
+                                                <th>Order Status</th>
+                                                <th></th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model != null && !Model.Any())
+                                            {
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-secondary">-- No orders available --</td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                foreach (var order in Model.Where(o => o.order_status != "Served"))
+                                                {
+                                        <tr>
+                                            <td>@order.customer_name</td>
+                                            <td>@order.total_amount</td>
+                                            <td>@order.date_ordered.ToString("MMMM d, yyyy - h:mm tt")</td>
+                                            <td style="margin-left: 10px">
+                                                @order.order_status
+                                            </td>
+                                            <td>
+                                                @if (order.order_status == "Ready")
+                                                {
+                                                    <form action="@Url.Action("ServeOrder", "CashierOrders")" method="post" style="display:inline;">
+                                                        <input type="hidden" name="orderId" value="@order.order_id" />
+                                                        <button type="submit" class="btn btn-success btn-sm ml-2">Serve</button>
+                                                    </form>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("ViewOrderDetails", "CashierOrders", new { order_id = order.order_id })" class="text-decoration-none text-theme-1"><i class="fas fa-list-ul"></i></a>
+                                            </td>
+                                        </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TO SERVE TAB -->
+                        <div class="tab-pane fade" id="to-serve" role="tabpanel" aria-labelledby="to-serve-tab">
+                            <div class="row px-5">
+                                <div class="col-sm-12">
+                                    <table class="table table-responsive table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Customer</th>
+                                                <th>Total Amount</th>
+                                                <th>Date Ordered</th>
+                                                <th>Order Status</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model != null && !Model.Any(o => o.order_status == "Served"))
+                                            {
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-secondary">-- No "Served" orders available --</td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                foreach (var order in Model.Where(o => o.order_status == "Served"))
+                                                {
+                                                    <tr>
+                                                        <td>@order.customer_name</td>
+                                                        <td>@order.total_amount</td>
+                                                        <td>@order.date_ordered.ToString("MMMM d, yyyy - h:mm tt")</td>
+                                                        <td>@order.order_status</td>
+                                                        <td>
+                                                            <a href="@Url.Action("ViewOrderDetails", "CashierOrders", new { order_id = order.order_id })" class="text-decoration-none text-theme-1"><i class="fas fa-list-ul"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- End of Tab Content -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

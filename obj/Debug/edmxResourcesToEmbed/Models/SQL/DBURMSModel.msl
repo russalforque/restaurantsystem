@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="db_urmsModelStoreContainer" CdmEntityContainer="db_urmsEntities">
+    <EntitySetMapping Name="tbl_discounts">
+      <EntityTypeMapping TypeName="db_urmsModel.tbl_discounts">
+        <MappingFragment StoreEntitySet="tbl_discounts">
+          <ScalarProperty Name="is_active" ColumnName="is_active" />
+          <ScalarProperty Name="discount_amount" ColumnName="discount_amount" />
+          <ScalarProperty Name="discount_percentage" ColumnName="discount_percentage" />
+          <ScalarProperty Name="description" ColumnName="description" />
+          <ScalarProperty Name="discount_code" ColumnName="discount_code" />
+          <ScalarProperty Name="discount_id" ColumnName="discount_id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="tbl_menu_items">
+      <EntityTypeMapping TypeName="db_urmsModel.tbl_menu_items">
+        <MappingFragment StoreEntitySet="tbl_menu_items">
+          <ScalarProperty Name="is_available" ColumnName="is_available" />
+          <ScalarProperty Name="category" ColumnName="category" />
+          <ScalarProperty Name="price" ColumnName="price" />
+          <ScalarProperty Name="description" ColumnName="description" />
+          <ScalarProperty Name="name" ColumnName="name" />
+          <ScalarProperty Name="menu_item_id" ColumnName="menu_item_id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="tbl_order_items">
+      <EntityTypeMapping TypeName="db_urmsModel.tbl_order_items">
+        <MappingFragment StoreEntitySet="tbl_order_items">
+          <ScalarProperty Name="discount_id" ColumnName="discount_id" />
+          <ScalarProperty Name="line_price" ColumnName="line_price" />
+          <ScalarProperty Name="quantity" ColumnName="quantity" />
+          <ScalarProperty Name="menu_item_id" ColumnName="menu_item_id" />
+          <ScalarProperty Name="order_id" ColumnName="order_id" />
+          <ScalarProperty Name="order_item_id" ColumnName="order_item_id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="tbl_orders">
+      <EntityTypeMapping TypeName="db_urmsModel.tbl_orders">
+        <MappingFragment StoreEntitySet="tbl_orders">
+          <ScalarProperty Name="order_status" ColumnName="order_status" />
+          <ScalarProperty Name="contact_number" ColumnName="contact_number" />
+          <ScalarProperty Name="email" ColumnName="email" />
+          <ScalarProperty Name="customer_name" ColumnName="customer_name" />
+          <ScalarProperty Name="date_ordered" ColumnName="date_ordered" />
+          <ScalarProperty Name="total_amount" ColumnName="total_amount" />
+          <ScalarProperty Name="order_type" ColumnName="order_type" />
+          <ScalarProperty Name="order_id" ColumnName="order_id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="tbl_payment">
+      <EntityTypeMapping TypeName="db_urmsModel.tbl_payment">
+        <MappingFragment StoreEntitySet="tbl_payment">
+          <ScalarProperty Name="payment_status" ColumnName="payment_status" />
+          <ScalarProperty Name="payment_url" ColumnName="payment_url" />
+          <ScalarProperty Name="payment_method" ColumnName="payment_method" />
+          <ScalarProperty Name="amount" ColumnName="amount" />
+          <ScalarProperty Name="order_id" ColumnName="order_id" />
+          <ScalarProperty Name="payment_id" ColumnName="payment_id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="tbl_receipts">
+      <EntityTypeMapping TypeName="db_urmsModel.tbl_receipts">
+        <MappingFragment StoreEntitySet="tbl_receipts">
+          <ScalarProperty Name="cashier_id" ColumnName="cashier_id" />
+          <ScalarProperty Name="amount_due" ColumnName="amount_due" />
+          <ScalarProperty Name="sub_total" ColumnName="sub_total" />
+          <ScalarProperty Name="receipt_date" ColumnName="receipt_date" />
+          <ScalarProperty Name="order_id" ColumnName="order_id" />
+          <ScalarProperty Name="receipt_id" ColumnName="receipt_id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="tbl_reservations">
+      <EntityTypeMapping TypeName="db_urmsModel.tbl_reservations">
+        <MappingFragment StoreEntitySet="tbl_reservations">
+          <ScalarProperty Name="reservation_status" ColumnName="reservation_status" />
+          <ScalarProperty Name="note" ColumnName="note" />
+          <ScalarProperty Name="heads" ColumnName="heads" />
+          <ScalarProperty Name="time_end" ColumnName="time_end" />
+          <ScalarProperty Name="time_start" ColumnName="time_start" />
+          <ScalarProperty Name="reservation_date" ColumnName="reservation_date" />
+          <ScalarProperty Name="order_id" ColumnName="order_id" />
+          <ScalarProperty Name="reservation_id" ColumnName="reservation_id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="tbl_users">
+      <EntityTypeMapping TypeName="db_urmsModel.tbl_users">
+        <MappingFragment StoreEntitySet="tbl_users">
+          <ScalarProperty Name="password" ColumnName="password" />
+          <ScalarProperty Name="email" ColumnName="email" />
+          <ScalarProperty Name="usertype" ColumnName="usertype" />
+          <ScalarProperty Name="lastname" ColumnName="lastname" />
+          <ScalarProperty Name="middlename" ColumnName="middlename" />
+          <ScalarProperty Name="firstname" ColumnName="firstname" />
+          <ScalarProperty Name="user_id" ColumnName="user_id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping>

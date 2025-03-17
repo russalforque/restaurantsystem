@@ -1,0 +1,1040 @@
+﻿@model Uling_RestaurantManagementSystem.Models.Custom.CashierPOSViewModel
+@using Uling_RestaurantManagementSystem.Models.Custom
+
+@{
+    ViewBag.Title = "Point Of Sale";
+}
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar-->
+    @Html.Partial("_SideBar")
+
+    <!-- Page content wrapper-->
+    <div id="page-content-wrapper">
+        <!-- Top navigation-->
+        @Html.Partial("_Nav")
+
+        <!-- Page content-->
+        <div class="container-fluid mb-5">
+            <div class="row">
+                @*show in mobile view*@
+                <div class="col-sm-6 d-block d-md-none">
+                    <div class="bg-light mt-3 py-4 ps-4 pe-5 rounded-corner">
+                        <small class="text-secondary">Order Details</small>
+
+                        <table class="table table-responsive">
+                            <thead>
+                                <tr>
+                                    <th>menu</th>
+                                    <th>qty</th>
+                                    <th>discount</th>
+                                    <th>total</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var existingOrderItemss = Session["OrderItems"] as List<OrderItemModel> ?? new List<OrderItemModel>();
+                                    var countOrderItemss = existingOrderItemss.Count();
+                                    decimal subTotals = 0;
+
+                                    if (existingOrderItemss.Count() == 0)
+                                    {
+                                        <tr>
+                                            <td colspan="4" class="text-center text-secondary">-- no orders --</td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        foreach (var item in existingOrderItemss)
+                                        {
+                                            string discountText = "-";
+                                            decimal discountPercentage = 0;
+                                            decimal discountAmount = 0;
+
+                                            if (item.DiscountId != 0)
+                                            {
+                                                foreach (var discount in Model.Discounts)
+                                                {
+                                                    if (discount.discount_id == item.DiscountId)
+                                                    {
+                                                        discountText = discount.discount_code;
+                                                        discountPercentage = discount.discount_percentage;
+                                                        discountAmount = discount.discount_amount;
+
+                                                    }
+                                                }
+                                            }
+
+                                            string itemQuantity = item.Quantity + "x";
+                                            decimal initialLinePrice = item.LineTotal;
+                                            decimal finalLinePrice = 0;
+
+                                            // check for discounts
+                                            if (discountPercentage != 0 && discountAmount == 0)
+                                            {
+                                                // has discount percentage off
+                                                decimal discountDecimalForm = discountPercentage / 100;
+                                                decimal discountOff = item.Unit_Price * discountDecimalForm;
+                                                finalLinePrice = initialLinePrice - discountOff;
+
+
+                                            }
+                                            else if (discountPercentage == 0 && discountAmount != 0)
+                                            {
+                                                // has discount fix amount off
+                                                finalLinePrice = initialLinePrice - discountAmount;
+                                            }
+                                            else
+                                            {
+                                                // no discount
+                                                finalLinePrice = initialLinePrice;
+                                            }
+
+                                            string linePrice = Convert.ToDecimal(finalLinePrice).ToString("F2");
+                                            subTotals += Convert.ToDecimal(finalLinePrice);
+
+                                            <tr>
+                                                <td>@item.MenuName</td>
+                                                <td>@itemQuantity</td>
+                                                <td>@discountText</td>
+                                                <td>₱ @linePrice</td>
+                                                <td>
+                                                    <small class="text-theme-1 me-3" style="cursor: pointer" onclick="removeMenuItem(@item.MenuItemId)">Remove</small><span class="mx-1">|</span>
+                                                    <small class="text-theme-1" style="cursor: pointer" onclick="viewAddDiscountModal(@item.OrderItemId)">Discount</small>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                            </tbody>
+                            @if (countOrderItemss > 0)
+                            {
+                                <caption>
+                                    Subtotal: <span class="font-weight-600">₱ @subTotals.ToString("F2")</span>
+                                </caption>
+                            }
+                        </table>
+
+                        <div>
+                            @if (countOrderItemss > 0)
+                            {
+                                <div class="mt-4">
+                                    <form action="#" method="post" id="counterOrderFormMobile">
+                                        <div class="mb-1 mt-2">
+                                            <label for="customer_name" class="form-label ms-1">Customer Name</label>
+                                            <input type="text" class="form-control rounded-corner" id="customer_name_input_mobile">
+                                        </div>
+
+                                        <div class="text-end">
+                                            <button type="submit" class="btn-urms btn-theme-1 rounded-corner px-5 mt-4">Proceed</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3 mx-sm-4">
+                <div class="col-sm-5">
+
+                    @* Main Course *@
+                    <h1 class="font-weight-600 text-theme-1 text-center mt-5">Main Course</h1>
+                    <div class="bg-light mt-3 py-4 px-4 rounded-corner">
+                        <select class="form-select form-select-lg" id="select_main_course">
+                            <option value="" selected>Select main course menu...</option>
+                            @if (Model != null && Model.MenuItems.Any())
+                            {
+                                foreach (var item in Model.MenuItems)
+                                {
+                                    if (item.category == "Main Course")
+                                    {
+                                        <option value="@item.menu_item_id"
+                                                item-name="@item.name"
+                                                item-desc="@item.description"
+                                                item-price="@item.price.ToString("F2")"
+                                                item-status="@(item.is_available.HasValue && item.is_available.Value ? "1" : "0")">
+                                            @item.name
+                                        </option>
+                                    }
+                                }
+                            }
+                        </select>
+
+                        <div class="row gx-3 gy-2 mt-2 align-items-center">
+                            <div class="col-sm-5 px-md-4">
+                                <span id="text_main_item_name">-</span> <br />
+                                <small id="text_main_item_desc">-</small> <br />
+                                <span class="mt-3" id="text_main_item_availability">-</span>
+                            </div>
+                            <div class="col-sm-2 text-md-center">₱ <span id="text_main_item_price">--.--</span></div>
+                            <div class="col-sm-3" id="main_quantity_container" style="display: none">
+                                <input type="number" class="form-control" id="text_main_item_quantity" value="1" aria-label="Quantity">
+                            </div>
+                            <div class="col-sm-2 text-md-end" id="main_button_container" style="display: none">
+                                <input type="hidden" id="text_main_item_id" />
+                                <button type="button" class="btn-urms btn-outline-urms rounded-corner ms-sm-3 px-4" onclick="addToCart('main')">Add</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    @* Dessert *@
+                    <h1 class="font-weight-600 text-theme-1 text-center mt-5">Dessert</h1>
+                    <div class="bg-light mt-3 py-4 px-4 rounded-corner">
+                        <select class="form-select form-select-lg" id="select_dessert">
+                            <option value="" selected>Select dessert menu...</option>
+                            @if (Model != null && Model.MenuItems.Any())
+                            {
+                                foreach (var item in Model.MenuItems)
+                                {
+                                    if (item.category == "Dessert")
+                                    {
+                                        <option value="@item.menu_item_id"
+                                                item-name="@item.name"
+                                                item-desc="@item.description"
+                                                item-price="@item.price.ToString("F2")"
+                                                item-status="@(item.is_available.HasValue && item.is_available.Value ? "1" : "0")">
+                                            @item.name
+                                        </option>
+                                    }
+                                }
+                            }
+                        </select>
+
+                        <div class="row gx-3 gy-2 mt-2 align-items-center">
+                            <div class="col-sm-5 px-md-4">
+                                <span id="text_dessert_item_name">-</span> <br />
+                                <small id="text_dessert_item_desc">-</small> <br />
+                                <span class="mt-3" id="text_dessert_item_availability">-</span>
+                            </div>
+                            <div class="col-sm-2 text-md-center">₱ <span id="text_dessert_item_price">--.--</span></div>
+                            <div class="col-sm-3" id="dessert_quantity_container" style="display: none">
+                                <input type="number" class="form-control" id="text_dessert_item_quantity" value="1" aria-label="Quantity">
+                            </div>
+                            <div class="col-sm-2 text-md-end" id="dessert_button_container" style="display: none">
+                                <input type="hidden" id="text_dessert_item_id" />
+                                <button type="button" class="btn-urms btn-outline-urms rounded-corner ms-sm-3 px-4" onclick="addToCart('dessert')">Add</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    @* Drinks *@
+                    <h1 class="font-weight-600 text-theme-1 text-center mt-5">Drinks</h1>
+                    <div class="bg-light mt-3 py-4 px-4 rounded-corner">
+                        <select class="form-select form-select-lg" id="select_drinks">
+                            <option value="" selected>Select drink menu...</option>
+                            @if (Model != null && Model.MenuItems.Any())
+                            {
+                                foreach (var item in Model.MenuItems)
+                                {
+                                    if (item.category == "Drinks")
+                                    {
+                                        <option value="@item.menu_item_id"
+                                                item-name="@item.name"
+                                                item-desc="@item.description"
+                                                item-price="@item.price.ToString("F2")"
+                                                item-status="@(item.is_available.HasValue && item.is_available.Value ? "1" : "0")">
+                                            @item.name
+                                        </option>
+                                    }
+                                }
+                            }
+                        </select>
+
+                        <div class="row gx-3 gy-2 mt-2 align-items-center">
+                            <div class="col-sm-5 px-md-4">
+                                <span id="text_drink_item_name">-</span> <br />
+                                <small id="text_drink_item_desc">-</small> <br />
+                                <span class="mt-3" id="text_drink_item_availability">-</span>
+                            </div>
+                            <div class="col-sm-2 text-md-center">₱ <span id="text_drink_item_price">--.--</span></div>
+                            <div class="col-sm-3" id="drink_quantity_container" style="display: none">
+                                <input type="number" class="form-control" id="text_drink_item_quantity" value="1" aria-label="Quantity">
+                            </div>
+                            <div class="col-sm-2 text-md-end" id="drink_button_container" style="display: none">
+                                <input type="hidden" id="text_drink_item_id" />
+                                <button type="button" class="btn-urms btn-outline-urms rounded-corner ms-sm-3 px-4" onclick="addToCart('drink')">Add</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @*show in desktop view*@
+                <div class="col-sm-7 d-none d-md-block mt-5 pt-3">
+                    <div class="bg-light mt-5 py-4 ps-4 pe-5 rounded-corner">
+                        <small class="text-secondary">Order Details</small>
+
+                        <dl class="row mt-2">
+                            <dt class="col-sm-3">menu</dt>
+                            <dt class="col-sm-1">qty</dt>
+                            <dt class="col-sm-2">discount</dt>
+                            <dt class="col-sm-3">total</dt>
+                            <dt class="col-sm-3"></dt>
+                        </dl>
+                        <dl class="row" id="orderItemList">
+                            @{
+                                var existingOrderItems = Session["OrderItems"] as List<OrderItemModel> ?? new List<OrderItemModel>();
+                                var countOrderItems = existingOrderItems.Count();
+                                decimal subTotal = 0;
+
+                                if (existingOrderItems.Count() == 0)
+                                {
+                                    <dd class="col-sm-12 text-secondary text-center">-- no orders --</dd>
+                                }
+                                else
+                                {
+                                    foreach (var item in existingOrderItems)
+                                    {
+                                        string discountText = "-";
+                                        decimal discountPercentage = 0;
+                                        decimal discountAmount = 0;
+
+                                        if (item.DiscountId != 0)
+                                        {
+                                            foreach (var discount in Model.Discounts)
+                                            {
+                                                if (discount.discount_id == item.DiscountId)
+                                                {
+                                                    discountText = discount.discount_code;
+                                                    discountPercentage = discount.discount_percentage;
+                                                    discountAmount = discount.discount_amount;
+                                                }
+                                            }
+                                        }
+
+                                        string itemQuantity = item.Quantity + "x";
+                                        decimal initialLinePrice = item.LineTotal;
+                                        decimal finalLinePrice = 0;
+
+                                        // check for discounts
+                                        if (discountPercentage != 0 && discountAmount == 0)
+                                        {
+                                            // has discount percentage off
+                                            decimal discountDecimalForm = discountPercentage / 100;
+                                            decimal discountOff = item.Unit_Price * discountDecimalForm;
+                                            finalLinePrice = initialLinePrice - discountOff;
+                                        }
+                                        else if (discountPercentage == 0 && discountAmount != 0)
+                                        {
+                                            // has discount fix amount off
+                                            finalLinePrice = initialLinePrice - discountAmount;
+                                        }
+                                        else
+                                        {
+                                            // no discount
+                                            finalLinePrice = initialLinePrice;
+                                        }
+
+                                        string linePrice = Convert.ToDecimal(finalLinePrice).ToString("F2");
+                                        subTotal += Convert.ToDecimal(finalLinePrice);
+
+                                        <dd class="col-sm-3">@item.MenuName</dd>
+                                        <dd class="col-sm-1">@itemQuantity </dd>
+                                        <dd class="col-sm-2">@discountText</dd>
+                                        <dd class="col-sm-3">₱ @linePrice</dd>
+                                        <dd class="col-sm-3">
+                                            <small class="text-theme-1" style="cursor: pointer" onclick="removeMenuItem(@item.MenuItemId)">Remove</small><span class="mx-1">|</span>
+                                            <small class="text-theme-1" style="cursor: pointer" onclick="viewAddDiscountModal(@item.OrderItemId)">Discount</small>
+                                        </dd>
+                                    }
+                                }
+                            }
+                        </dl>
+
+                        @if (countOrderItems > 0)
+                        {
+                            <hr />
+                            <dl class="row">
+                                <dt class="col-sm-6 text-end">Subtotal: </dt>
+                                <dd class="col-sm-6">
+                                    ₱ @subTotal.ToString("F2")
+                                </dd>
+                            </dl>
+                        }
+
+                        <div>
+                            @if (countOrderItems > 0)
+                            {
+                                <div class="mt-4">
+                                    <form action="#" method="post" id="counterOrderForm">
+                                        <div class="mb-1 mt-2">
+                                            <label for="customer_name" class="form-label ms-1">Customer Name</label>
+                                            <input type="text" class="form-control rounded-corner" id="customer_name_input">
+                                        </div>
+
+                                        <div class="text-end">
+                                            <button type="submit" class="btn-urms btn-theme-1 rounded-corner px-5 mt-4">Proceed</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Order Modal -->
+<div class="modal fade" id="confirmOrderModal" tabindex="-1" role="dialog" aria-labelledby="confirmOrderModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmOrderModalTitle">Confirm Order</h5>
+            </div>
+            <div class="modal-body">
+                <small class="text-secondary">Customer Order</small>
+
+                <dl class="row mt-2">
+                    <dt class="col-sm-3">menu</dt>
+                    <dt class="col-sm-3">qty</dt>
+                    <dt class="col-sm-3">discount</dt>
+                    <dt class="col-sm-3">total</dt>
+                </dl>
+                <dl class="row" id="orderItemList">
+                    @{
+                        decimal subTotalToConfirm = 0;
+                        if (existingOrderItems.Count() == 0)
+                        {
+                            <dd class="col-sm-12 text-secondary text-center">-- no orders --</dd>
+                        }
+                        else
+                        {
+                            foreach (var item in existingOrderItems)
+                            {
+                                string discountText = "-";
+                                decimal discountPercentage = 0;
+                                decimal discountAmount = 0;
+
+                                if (item.DiscountId != 0)
+                                {
+                                    foreach (var discount in Model.Discounts)
+                                    {
+                                        if (discount.discount_id == item.DiscountId)
+                                        {
+                                            discountText = discount.discount_code;
+                                            discountPercentage = discount.discount_percentage;
+                                            discountAmount = discount.discount_amount;
+                                        }
+                                    }
+                                }
+
+                                string itemQuantity = item.Quantity + "x";
+                                decimal initialLinePrice = item.LineTotal;
+                                decimal finalLinePrice = 0;
+
+                                // check for discounts
+                                if (discountPercentage != 0 && discountAmount == 0)
+                                {
+                                    // has discount percentage off
+                                    decimal discountDecimalForm = discountPercentage / 100;
+                                    decimal discountOff = item.Unit_Price * discountDecimalForm;
+                                    finalLinePrice = initialLinePrice - discountOff;
+                                }
+                                else if (discountPercentage == 0 && discountAmount != 0)
+                                {
+                                    // has discount fix amount off
+                                    finalLinePrice = initialLinePrice - discountAmount;
+                                }
+                                else
+                                {
+                                    // no discount
+                                    finalLinePrice = initialLinePrice;
+                                }
+
+                                string linePrice = Convert.ToDecimal(finalLinePrice).ToString("F2");
+                                subTotalToConfirm += Convert.ToDecimal(finalLinePrice);
+
+                                <dd class="col-sm-3">@item.MenuName</dd>
+                                <dd class="col-sm-3">@itemQuantity </dd>
+                                <dd class="col-sm-3">@discountText</dd>
+                                <dd class="col-sm-3">₱ @linePrice</dd>
+                            }
+                        }
+                    }
+                </dl>
+
+                @if (countOrderItems > 0)
+                {
+                    <dl class="row bg-light py-3">
+                        <dt class="col-sm-9 text-end">Subtotal: </dt>
+                        <dd class="col-sm-3">
+                            ₱ @subTotalToConfirm.ToString("F2")
+                        </dd>
+                    </dl>
+                }
+            </div>
+            <div class="modal-footer">
+                <form action="#" method="post" id="confirmedOrderForm">
+                    <input type="hidden" name="customer_name" id="customer_name" value="" />
+                    <button type="button" class="btn btn-secondary rounded-corner px-3" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn-urms btn-theme-1 rounded-corner px-3">Confirm</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Apply Discount Modal -->
+<div class="modal fade" id="applyDiscountModal" tabindex="-1" role="dialog" aria-labelledby="applyDiscountModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="applyDiscountModalTitle">Apply Discount</h5>
+            </div>
+            <div class="modal-body">
+                <select class="form-select form-select-lg" id="select_discount">
+                    <option value="" selected>Select discount to apply...</option>
+                    @if (Model != null && Model.Discounts.Any())
+                    {
+                        foreach (var discount in Model.Discounts)
+                        {
+                            <option discount-id="@discount.discount_id"
+                                    discount-code="@discount.discount_code"
+                                    discount-percentage="@discount.discount_percentage"
+                                    discount-amount="@discount.discount_amount">
+                                @discount.description
+                            </option>
+                        }
+                    }
+                </select>
+
+                <div class="row bg-light mt-3 mx-1">
+                    <div class="col-sm-2 py-3 text-center" style="background-color: lightgray;">
+                        <h5 class="text-theme-1" style="margin-top: 0.8rem !important" id="h5_discount">-</h5>
+                    </div>
+                    <div class="col-sm-10 py-3">
+                        <span class="font-weight-600">Discount Code: </span><span id="span_discount_code">-</span> <br />
+                        <span class="font-weight-600">Discount:</span> <span id="span_discount_value">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form action="#" method="post" id="applySelectedDiscountForm">
+                    <input type="hidden" name="discount_id" id="discount_id" />
+                    <input type="hidden" name="order_item_id" id="order_item_id" />
+                    <button type="button" class="btn btn-secondary rounded-corner px-3" id="btnCancelApplyDiscount">Cancel</button>
+                    <button type="submit" class="btn-urms btn-theme-1 rounded-corner px-3">Apply</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Receipt Modal -->
+<div class="modal fade" id="receiptModal" tabindex="-1" role="dialog" aria-labelledby="receiptModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="applyDiscountModalTitle">Order Receipt</h5>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mt-3">
+                    <span>ULING TOP VIEW RESTAURANT</span> <br />
+                    <span>GAWAY-GAWAY ST., ULING, NAGA CITY, CEBU</span> <br />
+                    <br />
+                    <br />
+                    <span>DINE IN</span> <br />
+
+                    <br />
+                    <br />
+                </div>
+                <div class="px-3">
+                    <span>Receipt No : </span> <span id="span_receipt_id">-</span> <br />
+                    <span>Order No : </span> <span id="span_order_id">-</span> <br />
+                    <span>Date Time : </span> <span id="span_receipt_date">-</span> <br />
+                </div>
+                <div class="px-3 mt-3">
+                    <table class="table table-responsive">
+                        <thead>
+                            <tr>
+                                <td>ITEM (S)</td>
+                                <td>QTY</td>
+                                <td>UPRICE</td>
+                                <td>TOTAL</td>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody_receipt_items">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="px-3 mt-3">
+                    <span>SUB TOTAL : </span> <span id="span_sub_total">-</span> <br />
+                    <span>AMOUNT DUE : </span> <span id="span_amount_due">-</span> <br />
+                    <span>Cashier : </span> <span id="span_cashier">-</span> <br />
+                    <span>Customer : </span> <span id="span_customer">-</span> <br />
+                </div>
+
+                <div class="text-center px-3 mt-5">
+                    <span>THIS SERVES AS YOUR SALES INVOICE</span> <br />
+                    <span>Thank you &Aacute; Come Again!</span> <br />
+                </div>
+
+                <div class="text-center px-3 mt-5">
+                    <span>FOLLOW US ON FB: Uling Top View Restaurant</span>
+                </div>
+
+            </div>
+            <div class="modal-footer px-4">
+                <form action="#" method="post" id="receiptActionsForm">
+                    <button type="button" class="btn btn-secondary rounded-corner px-3" id="btnCloseReceipt">Close</button>
+                    <button type="button" class="btn-urms btn-theme-1 rounded-corner px-4" onclick="printReceipt()">Print</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    @* [Main Course] dropdown functionality script *@
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // temporary code block for showing receipt modal
+            // $('#receiptModal').modal('show');
+
+            const selectMainCourse = document.getElementById('select_main_course');
+
+            selectMainCourse.addEventListener('change', function () {
+                const selectedOption = selectMainCourse.options[selectMainCourse.selectedIndex];
+
+                // Get the data attributes
+                const itemValue = selectedOption.getAttribute('value');
+                const itemName = selectedOption.getAttribute('item-name');
+                const itemDesc = selectedOption.getAttribute('item-desc');
+                const itemPrice = selectedOption.getAttribute('item-price');
+                const itemStatus = selectedOption.getAttribute('item-status');
+
+                // Populate the corresponding text elements
+                $('#text_main_item_id').val(itemValue);
+                document.getElementById('text_main_item_name').textContent = itemName || 'Select main course menu';
+                document.getElementById('text_main_item_desc').textContent = itemDesc || '';
+
+                const availabilitySpan = document.getElementById('text_main_item_availability');
+                const quantityContainer = document.getElementById('main_quantity_container');
+                const buttonContainer = document.getElementById('main_button_container');
+
+                if (itemStatus === "1") {
+                    availabilitySpan.textContent = "Available";
+                    availabilitySpan.classList.remove('text-danger');
+                    availabilitySpan.classList.add('text-success');
+
+                    // Show quantity and button containers
+                    quantityContainer.style.display = 'block';
+                    buttonContainer.style.display = 'block';
+                } else {
+                    availabilitySpan.textContent = "Out of order";
+                    availabilitySpan.classList.remove('text-success');
+                    availabilitySpan.classList.add('text-danger');
+
+                    // Hide quantity and button containers
+                    quantityContainer.style.display = 'none';
+                    buttonContainer.style.display = 'none';
+                }
+
+                // Update the price
+                document.getElementById('text_main_item_price').textContent = itemPrice || '0.00';
+            });
+        });
+
+    </script>
+
+    @* [Dessert] dropdown functionality script *@
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectDessert = document.getElementById('select_dessert');
+
+            selectDessert.addEventListener('change', function () {
+                const selectedDessertOption = selectDessert.options[selectDessert.selectedIndex];
+
+                // Get the data attributes
+                const itemDessertValue = selectedDessertOption.getAttribute('value');
+                const itemDessertName = selectedDessertOption.getAttribute('item-name');
+                const itemDessertDesc = selectedDessertOption.getAttribute('item-desc');
+                const itemDessertPrice = selectedDessertOption.getAttribute('item-price');
+                const itemDessertStatus = selectedDessertOption.getAttribute('item-status');
+
+                // Populate the corresponding text elements
+                $('#text_dessert_item_id').val(itemDessertValue);
+                document.getElementById('text_dessert_item_name').textContent = itemDessertName || 'Select dessert menu';
+                document.getElementById('text_dessert_item_desc').textContent = itemDessertDesc || '';
+
+                const availabilityDessertSpan = document.getElementById('text_dessert_item_availability');
+                const quantityDessertContainer = document.getElementById('dessert_quantity_container');
+                const buttonDessertContainer = document.getElementById('dessert_button_container');
+
+                if (itemDessertStatus === "1") {
+                    availabilityDessertSpan.textContent = "Available";
+                    availabilityDessertSpan.classList.remove('text-danger');
+                    availabilityDessertSpan.classList.add('text-success');
+
+                    // Show quantity and button containers
+                    quantityDessertContainer.style.display = 'block';
+                    buttonDessertContainer.style.display = 'block';
+                } else {
+                    availabilityDessertSpan.textContent = "Out of order";
+                    availabilityDessertSpan.classList.remove('text-success');
+                    availabilityDessertSpan.classList.add('text-danger');
+
+                    // Hide quantity and button containers
+                    quantityDessertContainer.style.display = 'none';
+                    buttonDessertContainer.style.display = 'none';
+                }
+
+                // Update the price
+                document.getElementById('text_dessert_item_price').textContent = itemDessertPrice || '0.00';
+            });
+        });
+
+    </script>
+
+    @* [Drinks] dropdown functionality script *@
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectDrink = document.getElementById('select_drinks');
+
+            selectDrink.addEventListener('change', function () {
+                const selectedDrinkOption = selectDrink.options[selectDrink.selectedIndex];
+
+                // Get the data attributes
+                const itemDrinkValue = selectedDrinkOption.getAttribute('value');
+                const itemDrinkName = selectedDrinkOption.getAttribute('item-name');
+                const itemDrinkDesc = selectedDrinkOption.getAttribute('item-desc');
+                const itemDrinkPrice = selectedDrinkOption.getAttribute('item-price');
+                const itemDrinkStatus = selectedDrinkOption.getAttribute('item-status');
+
+                // Populate the corresponding text elements
+                $('#text_drink_item_id').val(itemDrinkValue);
+                document.getElementById('text_drink_item_name').textContent = itemDrinkName || 'Select drink menu';
+                document.getElementById('text_drink_item_desc').textContent = itemDrinkDesc || '';
+
+                const availabilityDrinkSpan = document.getElementById('text_drink_item_availability');
+                const quantityDrinkContainer = document.getElementById('drink_quantity_container');
+                const buttonDrinkContainer = document.getElementById('drink_button_container');
+
+                if (itemDrinkStatus === "1") {
+                    availabilityDrinkSpan.textContent = "Available";
+                    availabilityDrinkSpan.classList.remove('text-danger');
+                    availabilityDrinkSpan.classList.add('text-success');
+
+                    // Show quantity and button containers
+                    quantityDrinkContainer.style.display = 'block';
+                    buttonDrinkContainer.style.display = 'block';
+                } else {
+                    availabilityDrinkSpan.textContent = "Out of order";
+                    availabilityDrinkSpan.classList.remove('text-success');
+                    availabilityDrinkSpan.classList.add('text-danger');
+
+                    // Hide quantity and button containers
+                    quantityDrinkContainer.style.display = 'none';
+                    buttonDrinkContainer.style.display = 'none';
+                }
+
+                // Update the price
+                document.getElementById('text_drink_item_price').textContent = itemDrinkPrice || '0.00';
+            });
+        });
+
+    </script>
+
+    @* [Discount] dropdown functionality script *@
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectDiscount = document.getElementById('select_discount');
+
+            selectDiscount.addEventListener('change', function () {
+                const selectDiscountOption = selectDiscount.options[selectDiscount.selectedIndex];
+
+                // Get the data attributes
+                const discountId = selectDiscountOption.getAttribute('discount-id');
+                const discountCode = selectDiscountOption.getAttribute('discount-code');
+                const discountPercentage = selectDiscountOption.getAttribute('discount-percentage');
+                const discountAmount = selectDiscountOption.getAttribute('discount-amount');
+
+                // Populate the corresponding text elements
+                document.getElementById('h5_discount').textContent = `${discountPercentage}% off` || '-';
+                document.getElementById('span_discount_code').textContent = `${discountCode} Discount` || '-';
+                $('#discount_id').val(discountId);
+
+                if (discountPercentage == 0 && discountAmount != 0) {
+                    document.getElementById('span_discount_value').textContent = `₱${discountAmount}% off` || '-';
+                }
+
+                if (discountPercentage != 0 && discountAmount == 0) {
+                    document.getElementById('span_discount_value').textContent = `${discountPercentage}% off` || '-';
+                }
+
+            });
+        });
+
+    </script>
+
+    <script>
+        function addToCart(menu_category) {
+            var menu_item_id = parseInt($('#text_' + menu_category + '_item_id').val());
+            var order_item_quantity = $('#text_' + menu_category + '_item_quantity').val();
+
+            if (parseInt(order_item_quantity) <= 0 || order_item_quantity == "") {
+                alert("Please enter a valid quantity.");
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("AddToCart", "CashierPOS")',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    menu_item_id: menu_item_id,
+                    quantity: parseInt(order_item_quantity)
+                }),
+                success: function (response) {
+                    if (!response) {
+                        alert(response.message);
+                    }
+                    else {
+                        window.location.reload();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log("Something went wrong in adding an item to cart.");
+                }
+            });
+        }
+
+        function removeMenuItem(menu_item_id) {
+            $.ajax({
+                url: '@Url.Action("RemoveToCart", "CashierPOS")',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    menu_item_id: menu_item_id
+                }),
+                success: function (response) {
+                    if (!response) {
+                        alert(response.message);
+                    }
+                    else {
+                        window.location.reload();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log("Something went wrong in removing an item to cart.");
+                }
+            });
+        }
+
+        /*Desktop submission of counter orders*/
+
+        $('#counterOrderForm').submit(function (e) {
+            e.preventDefault();
+
+            var customerInput = $('#customer_name_input').val();
+
+            if (customerInput == "") {
+                alert("Please provide a customer name");
+            } else {
+                $('#customer_name').val(customerInput);
+                $('#confirmOrderModal').modal('show');
+            }
+        });
+
+        function formatDate(jsonDate) {
+            // Extract the timestamp from the string
+            var timestamp = parseInt(jsonDate.replace(/\/Date\((\d+)\)\//, '$1'), 10);
+
+            // Create a Date object
+            var date = new Date(timestamp);
+
+            // Format the date
+            var options = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true
+            };
+
+            return date.toLocaleString('en-US', options);
+        }
+
+        $('#confirmedOrderForm').submit(function (e) {
+            e.preventDefault();
+
+            // jQuery object for the form
+            var form = $(this);
+            // Serialize the form data
+            var formData = form.serialize();
+
+            $.ajax({
+                url: '@Url.Action("PlaceOrder", "CashierPOS")',
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+
+                    const { success, message, receipt } = response;
+
+                    if (success) {
+                        form.trigger('reset');
+                        alert(message);
+
+                        console.log(receipt);
+
+                        $('#confirmOrderModal').modal('hide');
+
+                        const {
+                            receipt_id,
+                            order_id,
+                            receipt_date,
+                            sub_total,
+                            amount_due,
+                            cashier,
+                            customer_name,
+                            receipt_items
+                        } = receipt;
+
+                        $('#span_receipt_id').text(receipt_id);
+                        $('#span_order_id').text(order_id);
+                        $('#span_receipt_date').text(formatDate(receipt_date));
+                        $('#span_sub_total').text(sub_total);
+                        $('#span_amount_due').text(amount_due);
+                        $('#span_cashier').text(cashier);
+                        $('#span_customer').text(customer_name);
+
+                        receipt_items.forEach((item) => {
+                            $('#tbody_receipt_items').append('<tr>' +
+                                '<td>' + item.Item + '</td>' +
+                                '<td>' + item.Quantity + '</td>' +
+                                '<td>' + item.Unit_Price + '</td>' +
+                                '<td>' + item.Total_Price + '</td>' +
+                                '</tr>')
+                        });
+
+                        $('#receiptModal').modal('show');
+                    } else {
+                        throw new Error(message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('An error occurred: ' + error);
+                }
+            });
+        });
+
+        /*Mobile submission of counter orders*/
+        $('#counterOrderFormMobile').submit(function (e) {
+            e.preventDefault();
+
+            var customerInput = $('#customer_name_input_mobile').val();
+
+            if (customerInput == "") {
+                alert("Please provide a customer name");
+            } else {
+                $('#customer_name').val(customerInput);
+                $('#confirmOrderModal').modal('show');
+            }
+        });
+
+        function viewAddDiscountModal(orderItemId) {
+            $('#order_item_id').val(orderItemId);
+            $('#applyDiscountModal').modal('show');
+        }
+
+        $('#btnCancelApplyDiscount').click(function () {
+            $('#applyDiscountModal').modal('hide');
+        });
+
+        $('#applySelectedDiscountForm').submit(function (e) {
+            e.preventDefault();
+
+            // jQuery object for the form
+            var form = $(this);
+            // Serialize the form data
+            var formData = form.serialize();
+
+            if ($('#select_discount').val() == "") {
+                alert("Please select a discount first.");
+            } else {
+                $('#applyDiscountModal').modal('hide');
+
+                $.ajax({
+                    url: '@Url.Action("ApplyDiscount", "CashierPOS")',
+                    type: 'POST',
+                    data: formData,
+                    success: function (response) {
+
+                        const { success, message } = response;
+
+                        if (success) {
+                            form.trigger('reset');
+                            alert(message);
+
+                            var redirectUrl = '@Url.Action("LoadCashierPOS", "CashierPOS")';
+                            window.location.href = redirectUrl;
+                        } else {
+                            throw new Error(message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert('An error occurred: ' + error);
+                    }
+                });
+            }
+        });
+    </script>
+
+    @* Print functionality *@
+<script>
+    function printReceipt() {
+        // Create a new window
+        var printWindow = window.open('', '', 'height=900,width=1100');
+        printWindow.document.write('<html><head><title>Receipt</title>');
+
+        // Add CSS styles (you can include your own styles here)
+        //printWindow.document.write('<link href="~/Content/bootstrap.css" rel="stylesheet" />'); // External CSS
+        // OR copy styles directly
+        printWindow.document.write('<style>');
+        printWindow.document.write('.text-center { text-align: center; }'); // Add your modal styles here
+        printWindow.document.write('.px-3 { padding-left: 1rem; padding-right: 1rem; }');
+        printWindow.document.write('.mt-3 { margin-top: 1rem; }');
+        printWindow.document.write('.mt-5 { margin-top: 2.5rem; }');
+        printWindow.document.write('.table { width: 100%; border-collapse: collapse; }');
+        printWindow.document.write('.table td, .table th { border: 1px solid #ddd; padding: 8px; }');
+        printWindow.document.write('</style>');
+
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(document.querySelector('#receiptModal .modal-body').innerHTML);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close(); // Necessary for IE >= 10
+        printWindow.focus(); // Necessary for IE >= 10
+        printWindow.print();
+        printWindow.close();
+    }
+
+    $('#btnCloseReceipt').click(function () {
+        $('#receiptModal').modal('hide');
+    });
+</script>
+
+@* Script for detecting if the receipt modal is about to close *@
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get the modal element
+        var receiptModal = document.getElementById('receiptModal');
+
+        // Add event listener for when the modal is hidden
+        receiptModal.addEventListener('hidden.bs.modal', function () {
+            var redirectUrl = '@Url.Action("LoadCashierPOS", "CashierPOS")';
+            window.location.href = redirectUrl;
+        });
+    });
+</script>
+}

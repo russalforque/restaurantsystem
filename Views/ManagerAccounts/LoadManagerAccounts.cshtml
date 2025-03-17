@@ -1,0 +1,260 @@
+﻿@model IEnumerable<Uling_RestaurantManagementSystem.Models.SQL.tbl_users>
+
+@{
+    ViewBag.Title = "Accounts";
+}
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar-->
+    @Html.Partial("_SideBar")
+
+    <!-- Page content wrapper-->
+    <div id="page-content-wrapper">
+        <!-- Top navigation-->
+        @Html.Partial("_Nav")
+
+        <!-- Page content-->
+        <div class="container-fluid">
+            <div class="row px-5 pt-5">
+                <div class="col-sm-6">
+                    <p class="text-secondary" style="font-size: 1.5rem">Accounts</p>
+                </div>
+                <div class="col-sm-6">
+                    <button type="button" class="btn-urms btn-theme-1 float-end" data-bs-toggle="modal" data-bs-target="#addNewAccountModal">Add Account</button>
+                </div>
+            </div>
+            <div class="row px-5">
+                <div class="col-sm-12">
+                    <table class="table table-responsive table-hover">
+                        <thead>
+                            <tr>
+                                <th>First Name</th>
+                                <th>Middle Name</th>
+                                <th>Last Name</th>
+                                <th>User Type</th>
+                                <th>Email</th>
+                                <th>Password</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && !Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="7" class="text-center text-secondary">-- No users available --</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var user in Model)
+                                {
+                                    <tr>
+                                        <td>@user.firstname</td>
+                                        <td>@user.middlename</td>
+                                        <td>@user.lastname</td>
+                                        @{
+                                            string userType = "";
+                                            switch (user.usertype)
+                                            {
+                                                case 2:
+                                                    userType = "Cashier";
+                                                    break;
+                                                case 3:
+                                                    userType = "Cook";
+                                                    break;
+                                                default:
+                                                    break;
+                                            }
+                                        }
+                                        <td>@userType</td>
+                                        <td>@user.email</td>
+                                        <td>
+                                            @for (int i = 0; i < user.password.Length; i++)
+                                            {
+                                                <span style="font-weight: 500; font-size: 1.2rem; margin: 0 -2px;">*</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a href="@Url.Action("ViewAccountDetails", "ManagerAccounts", new { user_id = user.user_id })" class="text-decoration-none text-theme-1">View</a> |
+                                            <a href="@Url.Action("LoadEditAccount", "ManagerAccounts", new { user_id = user.user_id })" class="text-decoration-none text-theme-1">Edit</a> |
+                                            @*<a href="@Url.Action("ViewAccountDetails", "ManagerAccounts", new { user_id = user.user_id })" class="text-decoration-none text-theme-1" >Delete</a>*@
+                                            <span class="text-theme-1" style="cursor: pointer" onclick="confirmAccountDeletion(@user.user_id)">Delete</span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Confirmation Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="confirmDeleteModalLabel">Confirm Account Deletion</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure to delete this account?
+            </div>
+            <div class="modal-footer">
+                <form action="#" method="post" id="deleteAccountForm">
+                    <input type="hidden" name="user_id" id="user_id_to_delete" value="" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-urms btn-theme-1">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Account Modal -->
+<div class="modal fade" id="addNewAccountModal" tabindex="-1" aria-labelledby="addNewAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="addNewAccountModalLabel">Add Account</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="#" method="post" id="addNewAccountForm">
+                <div class="modal-body">
+
+                    <div class="form-group mt-2">
+                        <label for="firstname">First Name</label>
+                        <input type="text" class="form-control mt-2" name="firstname" id="firstname" />
+                    </div>
+
+                    <div class="form-group mt-2">
+                        <label for="middlename">Middle Name</label>
+                        <input type="text" class="form-control mt-2" name="middlename" id="middlename" />
+                    </div>
+
+                    <div class="form-group mt-2">
+                        <label for="lastname">Last Name</label>
+                        <input type="text" class="form-control mt-2" name="lastname" id="lastname" />
+                    </div>
+
+                    <div class="form-group mt-2">
+                        <label for="usertype">User Type</label>
+                        <select class="form-control mt-2" id="usertype" name="usertype">
+                            <option value="" selected>Select user type...</option>
+                            <option value="2">Cashier</option>
+                            <option value="3">Cook</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mt-2">
+                        <label for="email">Email</label>
+                        <input type="text" class="form-control mt-2" name="email" id="email" />
+                    </div>
+
+                    <div class="form-group mt-2">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control mt-2" name="password" id="password" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-urms btn-theme-1 px-4">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script>
+        function confirmAccountDeletion(user_id) {
+            $("#confirmDeleteModal").modal("show");
+            $("#user_id_to_delete").val(user_id);
+        }
+
+        $("#addNewAccountForm").submit(function (e) {
+            e.preventDefault();
+
+            if (
+                $("#firstname").val() == "" ||
+                $("#middlename").val() == "" ||
+                $("#lastname").val() == "" ||
+                $("#usertype").val() == "" ||
+                $("#email").val() == "" ||
+                $("#password").val() == ""
+            ) {
+                alert("Fill in the required fields");
+            } else {
+                // jQuery object for the form
+                var form = $(this);
+                // Serialize the form data
+                var formData = form.serialize();
+
+                $.ajax({
+                    url: '@Url.Action("AddAccount", "ManagerAccounts")',
+                    type: 'POST',
+                    data: formData,
+                    success: function (response) {
+                        const { success, message } = response;
+                        $("#addNewAccountModal").modal("hide");
+
+                        if (success) {
+                            form.trigger('reset');
+
+                            setTimeout(() => {
+                                alert(message);
+
+                                var redirectUrl = '@Url.Action("LoadManagerAccounts", "ManagerAccounts")';
+                                window.location.href = redirectUrl;
+                            }, 1000);
+                        } else {
+                            throw new Error("Something went wrong!")
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('An error occurred: ' + error);
+                    }
+                });
+            }
+        });
+
+        $("#deleteAccountForm").submit(function (e) {
+            e.preventDefault();
+
+            // jQuery object for the form
+            var form = $(this);
+            // Serialize the form data
+            var formData = form.serialize();
+
+            $.ajax({
+                url: '@Url.Action("DeleteAccount", "ManagerAccounts")',
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    const { success, message } = response;
+                    $("#confirmDeleteModal").modal("hide");
+
+                    if (success) {
+                        form.trigger('reset');
+
+                        setTimeout(() => {
+                            alert(message);
+
+                            var redirectUrl = '@Url.Action("LoadManagerAccounts", "ManagerAccounts")';
+                            window.location.href = redirectUrl;
+                        }, 1000);
+                    } else {
+                        throw new Error("Something went wrong!")
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('An error occurred: ' + error);
+                }
+            });
+        });
+    </script>
+
+}

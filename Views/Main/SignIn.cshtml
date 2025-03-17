@@ -1,0 +1,67 @@
+﻿@model Uling_RestaurantManagementSystem.Models.Custom.SignInModel
+
+@{
+    ViewBag.Title = "Sign In";
+}
+
+<div class="container login-card-wrapper">
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4">
+            <div class="card-shadow p-4 mt-5">
+                <h4 class="font-weight-600 text-center mt-2 mb-5"><span class="text-theme-1">Uling</span> Top View Restaurant</h4>
+
+                @if (ViewBag.ViewBagMessage != null)
+                {
+                    // ... existing error handling logic ...
+                    var viewBagMessage = ViewBag.ViewBagMessage as Uling_RestaurantManagementSystem.Models.Custom.ViewBagMessageModel;
+                    var alertType = "";
+
+                    switch (viewBagMessage.Key)
+                    {
+                        case "invalid_credentials":
+                            alertType = "alert-danger";
+                            break;
+                        default:
+                            alertType = "";
+                            break;
+                    }
+
+                    <div class="alert @alertType" role="alert">
+                        @viewBagMessage.Message
+                    </div>
+                }
+
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="row mb-3">
+                        @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                        <div class="col-sm-9">
+                            @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control", @type = "email" } })
+                            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        @Html.LabelFor(model => model.Password, htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                        <div class="col-sm-9">
+                            @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @class = "form-control", @type = "password" } })
+                            @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+
+                    
+
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn-urms btn-theme-1 px-4">Sign in</button>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
+</div>
+

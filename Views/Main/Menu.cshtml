@@ -1,0 +1,170 @@
+﻿@model List<IGrouping<string, Uling_RestaurantManagementSystem.Models.SQL.tbl_menu_items>>
+
+@{
+    ViewBag.Title = "Menu";
+}
+
+@Html.Partial("_Navbar")
+
+<div class="container mt-5 menu-container">
+    <h2 class="text-center mb-4">Our Menu</h2>
+
+    <!-- Filter Categories -->
+    <div class="menu-categories text-center">
+        <a href="#" class="category-filter" data-category="Main Course">Main Course</a>
+        <a href="#" class="category-filter" data-category="Dessert">Desserts</a> <!-- Change to match the database -->
+        <a href="#" class="category-filter" data-category="Drinks">Drinks</a> <!-- Change to match the database -->
+    </div>
+
+    <!-- Menu Items -->
+    <div id="menu-items">
+        @foreach (var categoryGroup in Model)
+        {
+            <div class="menu-category" data-category="@categoryGroup.Key">
+                <h3 class="category-title text-center mt-4">@categoryGroup.Key</h3>
+
+                <div class="menu-items text-center">
+                    @foreach (var item in categoryGroup)
+                    {
+                        <div class="menu-item">
+                            <h4 class="item-name">@item.name</h4>
+                            <p class="item-description">
+                                @if (item.description != "-")
+                                {
+                                    @item.description
+                                    <p class="item-price">₱ @item.price</p>
+                                }
+                                else
+                                {
+                                    <span class="item-price">₱ @item.price</span>
+                                }
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    /* Menu container styling */
+    .menu-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    /* Categories as clickable text */
+    .menu-categories a {
+        margin: 0 15px;
+        font-size: 18px;
+        color: black; /* Default black color */
+        text-decoration: none;
+        font-weight: bold;
+        position: relative;
+    }
+
+        /* Hover effect for categories */
+        .menu-categories a:hover {
+            color: #000; /* Black remains on hover */
+            text-decoration: underline;
+            text-decoration-color: orange;
+        }
+
+        /* Active and selected category underline */
+        .menu-categories a.active {
+            color: orange;
+        }
+
+    /* Hide all categories initially */
+    .menu-category {
+        display: none;
+    }
+
+        /* Show only the active category */
+        .menu-category.active {
+            display: block;
+        }
+
+    /* Menu item styling */
+    .category-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .menu-items {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .menu-item {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .item-name {
+        font-size: 20px;
+        font-weight: bold;
+        color: #000;
+    }
+
+    .item-description {
+        font-size: 16px;
+        color: #666;
+    }
+
+    .item-price {
+        font-size: 18px;
+        font-weight: bold;
+        color: #28a745;
+    }
+
+    .menu-item:hover {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 10px;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const filters = document.querySelectorAll(".category-filter");
+        const categories = document.querySelectorAll(".menu-category");
+
+        // Attach event listeners to filter links
+        filters.forEach(filter => {
+            filter.addEventListener("click", function (e) {
+                e.preventDefault(); // Prevent default link behavior
+
+                const selectedCategory = this.getAttribute("data-category");
+
+                // Highlight the active filter
+                filters.forEach(link => link.classList.remove("active"));
+                this.classList.add("active");
+
+                // Show only the selected category
+                categories.forEach(category => {
+                    if (category.getAttribute("data-category") === selectedCategory) {
+                        category.classList.add("active");
+                    } else {
+                        category.classList.remove("active");
+                    }
+                });
+            });
+        });
+
+        // Trigger the first category filter on page load
+        if (filters.length > 0) {
+            filters[0].click();
+        }
+    });
+</script>
+
+
+
+@Html.Partial("_Footer")

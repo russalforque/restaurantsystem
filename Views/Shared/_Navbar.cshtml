@@ -1,0 +1,39 @@
+﻿
+<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand font-weight-600 py-3" href="~/Main">
+            <img src="~/Content/assets/images/uling_logo.png" alt="EzyDrive Car Rental" class="d-inline-block align-text-top" style="height: 40px;" />
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link mx-sm-2
+                       @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "public__home" ? "active font-weight-600 text-theme-1" : "")"
+                       aria-current="page"
+                       href="@Url.Action("Index", "Main")">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link mx-sm-2
+                       @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "public__menu" ? "active font-weight-600 text-theme-1" : "")"
+                       aria-current="page"
+                       href="@Url.Action("Menu", "Main")">Menu</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link mx-sm-2
+                       @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "public__order" ? "active font-weight-600 text-theme-1" : "")"
+                       aria-current="page"
+                       href="@Url.Action("Order", "Main")">Order</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                   @* <a href="@Url.Action("SignIn", "Main")" role="button" class="btn-urms btn-theme-1 rounded-corner ms-sm-3 px-4">Take Out</a>*@
+                    <a href="@Url.Action("SignIn", "Main")" role="button" class="btn-urms rounded-corner btn-outline-urms ms-sm-1 px-4"><span class="mx-2">Login</span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

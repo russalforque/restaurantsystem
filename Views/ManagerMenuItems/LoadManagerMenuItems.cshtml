@@ -1,0 +1,160 @@
+﻿@model IEnumerable<Uling_RestaurantManagementSystem.Models.SQL.tbl_menu_items>
+
+@{
+    ViewBag.Title = "Menu Items";
+}
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar-->
+    @Html.Partial("_SideBar")
+
+    <!-- Page content wrapper-->
+    <div id="page-content-wrapper">
+        <!-- Top navigation-->
+        @Html.Partial("_Nav")
+
+        <!-- Page content-->
+        <div class="container-fluid">
+            <div class="row px-5 pt-5">
+                <div class="col-sm-12">
+                    <p class="text-secondary" style="font-size: 1.5rem">Menu Items</p>
+                </div>
+            </div>
+            <div class="row px-5">
+                <div class="col-sm-12">
+                    <table class="table table-responsive table-hover">
+                        <thead>
+                            <tr>
+                                <th>Menu Name</th>
+                                <th>Description</th>
+                                <th>Price</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && !Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center text-secondary">-- No menu items available --</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.name</td>
+                                        <td>@item.description</td>
+                                        <td>₱ @item.price.ToString("F2")</td>
+                                        <td>@item.category</td>
+                                        <td>
+                                            @{
+                                                string strStatus = "";
+
+                                                switch (item.is_available)
+                                                {
+                                                    case true:
+                                                        strStatus = "Available";
+                                                        break;
+                                                    case false:
+                                                        strStatus = "Out of order";
+                                                        break;
+                                                    default:
+                                                        break;
+                                                }
+                                            }
+
+                                            @strStatus
+                                        </td>
+                                        <td>
+                                            <span class="text-decoration-none text-theme-1" style="cursor: pointer" onclick="openMenuItemChangeStatusModal(@item.menu_item_id)">Change Status</span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Menu Item Status Modal -->
+<div class="modal fade" id="updateMenuItemStatusModal" tabindex="-1" aria-labelledby="updateDeliveryStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="#" method="post" id="udpateMenuItemStatusForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateDeliveryStatusModalLabel">Update Menu Item Availability</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="menu_item_id" id="menu_item_id_to_update_status" />
+                    <label for="delivery_status">Menu Item Status</label>
+                    <select class="form-control mt-2" id="select_is_available" name="is_available">
+                        <option value="">Select menu item status...</option>
+                        <option value="1">Available</option>
+                        <option value="0">Out of order</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary rounded-corner px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-urms btn-theme-1 rounded-corner px-4">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script>
+        function openMenuItemChangeStatusModal(menu_item_id) {
+            $('#menu_item_id_to_update_status').val(menu_item_id);
+            $('#updateMenuItemStatusModal').modal("show");
+        }
+
+        $('#udpateMenuItemStatusForm').submit(function (e) {
+            e.preventDefault();
+
+            if ($('#select_is_available').val() == "") {
+                alert("Kindly select a status first!");
+            } else {
+                $('#updateMenuItemStatusModal').modal("hide");
+
+                // jQuery object for the form
+                var form = $(this);
+                // Serialize the form data
+                var formData = form.serialize();
+
+                $.ajax({
+                    url: '@Url.Action("UpdateMenuItemStatus", "ManagerMenuItems")',
+                    type: 'POST',
+                    data: formData,
+                    success: function (response) {
+
+                        const { success, message } = response;
+
+                        if (success) {
+                            form.trigger('reset');
+                            alert(message);
+
+                            var redirectUrl = '@Url.Action("LoadManagerMenuItems", "ManagerMenuItems")';
+                            window.location.href = redirectUrl;
+                        } else {
+                            throw new Error("Something went wrong!")
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('An error occurred: ' + error);
+                    }
+                });
+            }
+        });
+    </script>
+
+
+}

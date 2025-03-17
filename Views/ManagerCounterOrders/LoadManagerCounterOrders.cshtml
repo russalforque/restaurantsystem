@@ -1,0 +1,135 @@
+﻿@model IEnumerable<Uling_RestaurantManagementSystem.Models.SQL.tbl_orders>
+
+@{
+    ViewBag.Title = "Counter Orders";
+}
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar-->
+    @Html.Partial("_SideBar")
+
+    <!-- Page content wrapper-->
+    <div id="page-content-wrapper">
+        <!-- Top navigation-->
+        @Html.Partial("_Nav")
+
+        <!-- Page content-->
+        <div class="container-fluid">
+            <div class="row px-5 pt-5">
+                <div class="col-sm-12">
+                    <p class="text-secondary" style="font-size: 1.5rem">Walk-In Orders</p>
+                </div>
+            </div>
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs mt-3" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active"
+                       id="accepted-tab"
+                       data-bs-toggle="tab"
+                       href="#accepted-reservations"
+                       role="tab"
+                       aria-controls="accepted-reservations"
+                       aria-selected="false">Accepted Orders</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link"
+                       id="cancelled-tab"
+                       data-bs-toggle="tab"
+                       href="#cancelled-reservations"
+                       role="tab"
+                       aria-controls="cancelled-reservations"
+                       aria-selected="false">Cancelled Orders</a>
+                </li>
+            </ul>
+
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="myTabContent">
+                <!-- ACCEPTED RESERVATIONS TAB -->
+                <div class="tab-pane fade show active" id="accepted-reservations" role="tabpanel" aria-labelledby="accepted-tab">
+                    <div class="row px-5">
+                        <div class="col-sm-12">
+                            <table class="table table-responsive table-light">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Total Amount</th>
+                                        <th>Date Ordered</th>
+                                        <th>Order Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null && !Model.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-secondary">-- No take-out orders available --</td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        foreach (var order in Model.Where(w => w.order_status == "Accepted" || w.order_status == "Preparation" || w.order_status == "Ready"))
+                                        {
+                                            <tr>
+                                                <td>@order.customer_name</td>
+                                                <td>@order.total_amount</td>
+                                                <td>@order.date_ordered.ToString("MMMM d, yyyy - h:mm tt")</td>
+                                                <td>@order.order_status</td>
+                                                <td>
+                                                    <a href="@Url.Action("ViewOrderDetails", "ManagerCounterOrders", new { order_id = order.order_id })" class="text-decoration-none text-theme-1"><i class="fas fa-list-ul"></i></a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CANCELLED RESERVATIONS TAB -->
+                <div class="tab-pane fade" id="cancelled-reservations" role="tabpanel" aria-labelledby="cancelled-tab">
+                    <div class="row px-5">
+                        <div class="col-sm-12">
+                            <table class="table table-responsive table-light">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Total Amount</th>
+                                        <th>Date Ordered</th>
+                                        <th>Order Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null && !Model.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-secondary">-- No take-out orders available --</td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        foreach (var order in Model.Where(w => w.order_status == "Cancelled"))
+                                        {
+                                            <tr>
+                                                <td>@order.customer_name</td>
+                                                <td>@order.total_amount</td>
+                                                <td>@order.date_ordered.ToString("MMMM d, yyyy - h:mm tt")</td>
+                                                <td>@order.order_status</td>
+                                                <td>
+                                                    <a href="@Url.Action("ViewOrderDetails", "ManagerCounterOrders", new { order_id = order.order_id })" class="text-decoration-none text-theme-1"><i class="fas fa-list-ul"></i></a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- End of Tab Content -->
+        </div>
+    </div>
+</div>
+

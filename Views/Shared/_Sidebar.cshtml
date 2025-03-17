@@ -1,0 +1,232 @@
+﻿@using Uling_RestaurantManagementSystem.Models.SQL
+
+@{ 
+    int pendingCounterOrdersCount = 0;
+    int pendingReservationOrdersCount = 0;
+    int pendingTakeOutOrdersCount = 0;
+}
+
+@{
+    if (Session["user_type"] != null)
+    {
+        var userType = Convert.ToInt32(Session["user_type"]);
+
+        if (userType == 3)
+        {
+            // Create an instance of the database context
+            using (var db = new db_urmsEntities())
+            {
+                pendingCounterOrdersCount = db.tbl_orders
+                    .Count(o =>
+                        !o.tbl_payment.Any() &&
+                        !o.tbl_reservations.Any() &&
+                        o.order_type == "Counter" &&
+                        o.order_status == "Accepted"
+                    );
+
+                pendingReservationOrdersCount = db.tbl_orders
+                    .Count(o =>
+                        o.tbl_reservations.Any() &&
+                        o.tbl_payment.Any() &&
+                        // status (only fetch the reservations that is already verified and paid)
+                        o.order_status == "Accepted" &&
+                        o.tbl_reservations.FirstOrDefault().reservation_status == "Accepted" &&
+                        o.tbl_payment.FirstOrDefault().payment_status == "Accepted" &&
+                        // fetch orders that type is Online and payment method is not CASH
+                        o.order_type == "Online" &&
+                        o.tbl_payment.FirstOrDefault().payment_method != "Cash"
+                    );
+
+                pendingTakeOutOrdersCount = db.tbl_orders
+                   .Count(o =>
+                    o.tbl_payment.Any() &&
+                    !o.tbl_reservations.Any() &&
+                    // status (only fetch the take-out orders that is already accepted and paid)
+                    o.order_status == "Accepted" &&
+                    o.tbl_payment.FirstOrDefault().payment_status == "Accepted" &&
+                    // fetch orders that type is Online and payment method is not CASH
+                    o.order_type == "Online" &&
+                    o.tbl_payment.FirstOrDefault().payment_method != "Cash"
+                   );
+            }
+        }
+    }
+}
+
+@{
+    var portalIcon = "";
+    var portalText = "";
+
+    if (Session["user_type"] != null)
+    {
+        var userType = Convert.ToInt32(Session["user_type"]);
+
+        switch (userType)
+        {
+            case 1: // ---> Manager
+                portalIcon = "fa-user-tie";
+                portalText = "Manager";
+                break;
+            case 2: // ---> Cashier
+                portalIcon = "fa-user-alt";
+                portalText = "Cashier";
+                break;
+            case 3: // ---> Cook
+                portalIcon = "fa-user-alt";
+                portalText = "Cook";
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+
+<div class="border-end bg-white" id="sidebar-wrapper">
+    <div class="sidebar-heading">
+        <h5 class="font-weight-600 text-center mt-2"><span class="text-theme-1">Uling</span> Top View Restaurant</h5>
+        <div class="text-center mt-sm-3">
+            <i class="fas @portalIcon text-secondary"></i> <small class="text-dark">@portalText</small>
+        </div>
+    </div>
+    <div class="list-group list-group-flush mt-sm-5 pt-sm-3">
+        @if (Session["user_id"] != null && Session["user_type"] != null)
+        {
+            int userType = Convert.ToInt32(Session["user_type"]);
+            if (userType == 1)
+            {
+                @* Manager Menu *@
+                <a class="list-group-item list-group-item-action list-group-item-light border-top p-3
+                    @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__dashboard" ? "active_item" : "")"
+                   href="@Url.Action("LoadManagerDashboard", "ManagerDashboard")">
+                    <i class="fas fa-chart-line @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__dashboard" ? "active-item-icon" : "")"></i>
+                    <span class="ms-2 @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__dashboard" ? "active-item-text" : "")">Dashboard</span>
+                </a>
+
+                <a class="list-group-item list-group-item-action list-group-item-light border-top p-3
+                    @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__reservations" ? "active_item" : "")"
+                   href="@Url.Action("LoadManagerReservation", "ManagerReservations")">
+                    <i class="fas fa-calendar-check @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__reservations" ? "active-item-icon" : "")"></i>
+                    <span class="ms-2 @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__reservations" ? "active-item-text" : "")">Reservations</span>
+                </a>
+
+                <a class="list-group-item list-group-item-action list-group-item-light border-top p-3
+                    @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__takeout_orders" ? "active_item" : "")"
+                   href="@Url.Action("LoadTakeOutOrders", "ManagerTakeOutOrders")">
+                    <i class="fas fa-shopping-bag @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__takeout_orders" ? "active-item-icon" : "")"></i>
+                    <span class="ms-2 @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__takeout_orders" ? "active-item-text" : "")">Take-Out Orders</span>
+                </a>
+
+                <a class="list-group-item list-group-item-action list-group-item-light border-top p-3
+                    @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__counter_orders" ? "active_item" : "")"
+                   href="@Url.Action("LoadManagerCounterOrders", "ManagerCounterOrders")">
+                    <i class="fas fa-tasks @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__counter_orders" ? "active-item-icon" : "")"></i>
+                    <span class="ms-2 @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__counter_orders" ? "active-item-text" : "")">Walk-In Orders</span>
+                </a>
+
+                <a class="list-group-item list-group-item-action list-group-item-light border-top p-3
+                    @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__menu_items" ? "active_item" : "")"
+                   href="@Url.Action("LoadManagerMenuItems", "ManagerMenuItems")">
+                    <i class="fas fa-utensils @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__menu_items" ? "active-item-icon" : "")"></i>
+                    <span class="ms-2 @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__menu_items" ? "active-item-text" : "")">Menu Items</span>
+                </a>
+
+                <a class="list-group-item list-group-item-action list-group-item-light border-top p-3
+                    @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__accounts" ? "active_item" : "")"
+                   href="@Url.Action("LoadManagerAccounts", "ManagerAccounts")">
+                    <i class="fas fa-users @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__accounts" ? "active-item-icon" : "")"></i>
+                    <span class="ms-2 @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "manager__accounts" ? "active-item-text" : "")">Accounts</span>
+                </a>
+            }
+            else if (userType == 2)
+            {
+                @* Cashier Menu *@
+                <a class="list-group-item list-group-item-action list-group-item-light border-top p-3
+                    @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cashier__dashboard" ? "active_item" : "")"
+                   href="@Url.Action("LoadCashierDashboard", "CashierDashboard")">
+                    <i class="fas fa-chart-line @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cashier__dashboard" ? "active-item-icon" : "")"></i>
+                    <span class="ms-2 @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cashier__dashboard" ? "active-item-text" : "")">Dashboard</span>
+                </a>
+
+                <a class="list-group-item list-group-item-action list-group-item-light border-top p-3
+                    @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cashier__orders" ? "active_item" : "")"
+                   href="@Url.Action("LoadCashierOrders", "CashierOrders")">
+                    <i class="fas fa-shopping-cart @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cashier__orders" ? "active-item-icon" : "")"></i>
+                    <span class="ms-2 @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cashier__orders" ? "active-item-text" : "")">Orders</span>
+                </a>
+
+
+                <a class="list-group-item list-group-item-action list-group-item-light border-top p-3
+                    @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cashier__pos" ? "active_item" : "")"
+                   href="@Url.Action("LoadCashierPOS", "CashierPOS")">
+                    <i class="fas fa-tasks @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cashier__pos" ? "active-item-icon" : "")"></i>
+                    <span class="ms-2 @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cashier__pos" ? "active-item-text" : "")">POS</span>
+                </a>
+            }
+            else if (userType == 3)
+            {
+                @* Cook Menu *@
+                <a class="list-group-item list-group-item-action list-group-item-light border-top p-3
+                    @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cook__dashboard" ? "active_item" : "")"
+                   href="@Url.Action("LoadCookDashboard", "CookDashboard")">
+                    <i class="fas fa-chart-line @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cook__dashboard" ? "active-item-icon" : "")"></i>
+                    <span class="ms-2 @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cook__dashboard" ? "active-item-text" : "")">Dashboard</span>
+                </a>
+
+                <a class="list-group-item list-group-item-action list-group-item-light border-top p-3
+                    @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cook__counter_orders" ? "active_item" : "")"
+                   href="@Url.Action("LoadCookCounterOrders", "CookCounterOrders")">
+                    <i class="fas fa-tasks @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cook__counter_orders" ? "active-item-icon" : "")"></i>
+                    <span class="ms-2 @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cook__counter_orders" ? "active-item-text" : "")">Counter Orders</span>
+                    <span class="badge bg-danger float-end">@pendingCounterOrdersCount</span>
+                </a>
+
+                <a class="list-group-item list-group-item-action list-group-item-light border-top p-3
+                    @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cook__reservation_orders" ? "active_item" : "")"
+                   href="@Url.Action("LoadCookReservationOrders", "CookReservationOrders")">
+                    <i class="fas fa-calendar-check @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cook__reservation_orders" ? "active-item-icon" : "")"></i>
+                    <span class="ms-2 @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cook__reservation_orders" ? "active-item-text" : "")">Reservation Orders</span>
+                    <span class="badge bg-danger float-end">@pendingReservationOrdersCount</span>
+                </a>
+
+                <a class="list-group-item list-group-item-action list-group-item-light border-top p-3
+                    @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cook__takeout_orders" ? "active_item" : "")"
+                   href="@Url.Action("LoadCookTakeOutOrders", "CookTakeOutOrders")">
+                    <i class="fas fa-shopping-bag @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cook__takeout_orders" ? "active-item-icon" : "")"></i>
+                    <span class="ms-2 @(ViewBag.CurrentPage != null && ViewBag.CurrentPage == "cook__takeout_orders" ? "active-item-text" : "")">Take-Out Orders</span>
+                    <span class="badge bg-danger float-end">@pendingTakeOutOrdersCount</span>
+                </a>
+            }
+        }
+
+        <a class="list-group-item list-group-item-action list-group-item-light border-bottom p-3"
+           href="/SupervisorAttendance/AttendanceList"
+           data-bs-toggle="modal" data-bs-target="#logoutConfirmationModal">
+            <i class="fas fa-sign-out-alt text-secondary"></i>
+            <span class="ms-2 text-secondary">Logout</span>
+        </a>
+    </div>
+</div>
+
+<!-- Sign Out Modal -->
+<div class="modal fade" id="logoutConfirmationModal" tabindex="-1" aria-labelledby="logoutConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @using (Html.BeginForm("SignOut", "Main", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Confirm Sign Out</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to sign out?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-urms btn-theme-1 px-4">Yes</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
